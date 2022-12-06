@@ -6,6 +6,7 @@ namespace App\Contexts\Sales\Domain\Entity;
 
 use App\Contexts\Sales\Domain\Notification\OrderCreated;
 use App\Contexts\Sales\Domain\Persistence\OrderRecord;
+use App\Contexts\Sales\Domain\Persistence\OrderRepository;
 use App\Contexts\Sales\Domain\Value\Product;
 use BadMethodCallException;
 use DateTimeImmutable;
@@ -105,21 +106,21 @@ final class Order
     }
 
     /**
-     * 永続化用のデータ生成
+     * 永続化
      */
-    public function toSaveRecord(): OrderRecord
+    public function save(OrderRepository $repository): void
     {
         if (empty($this->items)) {
             // 注文には1つ以上の明細が必要
             throw new InvalidArgumentException('Cannot order without items');
         }
-        return new OrderRecord(
+        $repository->save(new OrderRecord(
             date: $this->date,
             items: $this->items,
             customerUserId: $this->customerUserId,
             accepted: $this->accepted,
             finished: $this->finished,
-        );
+        ));
     }
 
     /**

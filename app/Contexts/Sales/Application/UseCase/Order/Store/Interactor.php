@@ -33,6 +33,6 @@ final class Interactor
         foreach ($input->items as $orderItem) {
             $order->add($products->getById($orderItem->productId), $orderItem->quantity);
         }
-        $this->orderRepository->save($order->toSaveRecord());
+        $order->save($this->orderRepository);
     }
 }
