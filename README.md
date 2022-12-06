@@ -14,6 +14,7 @@ classDiagram
     Product <.. Order
     OrderCreated <.. Order
     OrderRecord <.. Order
+    OrderRepository <.. Order
     class Product{
       +int id
       +string name
@@ -34,7 +35,7 @@ classDiagram
       +accept()
       +remind()
       +done()
-      +OrderRecord toSaveRecord()
+      +save(OrderRepository $repository)
       +Order restore(OrderRecord record)
     }
     class OrderCreated{
@@ -48,7 +49,12 @@ classDiagram
       +bool accepted
       +bool finished
     }
-    
+    class OrderRepository{
+      <<interface>>
+      +save(OrderRecord $record)
+      +OrderRecord findById(int id) 
+    }
+
     OrderRepository *-- Interactor
     OrderRecord <.. OrderRepository
     ProductQuery *-- Interactor
@@ -67,11 +73,6 @@ classDiagram
     class OrderItem{
       +int productId
       +int quantity
-    }
-    class OrderRepository{
-      <<interface>>
-      +save(OrderRecord $record)
-      +OrderRecord findById(int id) 
     }
     class ProductQuery{
       <<interface>>
