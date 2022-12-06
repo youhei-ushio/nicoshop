@@ -21,6 +21,7 @@ final class Order
      * @param Order\Item[] $items
      */
     private function __construct(
+        private int|null $id,
         private readonly DateTimeImmutable $date,
         private array $items,
         private readonly int $customerUserId,
@@ -36,6 +37,7 @@ final class Order
     ): self
     {
         return new self(
+            id: null, // 永続化まではID無し
             date: new DateTimeImmutable(), // 当日
             items: [],
             customerUserId: $customerUserId,
@@ -115,6 +117,7 @@ final class Order
             throw new InvalidArgumentException('Cannot order without items');
         }
         $repository->save(new OrderRecord(
+            id: $this->id,
             date: $this->date,
             items: $this->items,
             customerUserId: $this->customerUserId,
@@ -129,6 +132,7 @@ final class Order
     public static function restore(OrderRecord $record): self
     {
         return new self(
+            id: $record->id,
             date: $record->date,
             items: $record->items,
             customerUserId: $record->customerUserId,
