@@ -48,4 +48,46 @@ classDiagram
       +bool accepted
       +bool finished
     }
+    
+    OrderRepository *-- Interactor
+    OrderRecord <.. OrderRepository
+    ProductQuery *-- Interactor
+    Input <.. Interactor
+    OrderItem *-- Input
+    ProductPaginator <.. ProductQuery
+    Product <.. ProductPaginator
+    Iterator <|-- ProductPaginator
+    class Interactor{
+      +execute()
+    }
+    class Input{
+      +OrderItem[] items
+      +int customerUserId
+    }
+    class OrderItem{
+      +int productId
+      +int quantity
+    }
+    class OrderRepository{
+      <<interface>>
+      +save(OrderRecord $record)
+      +OrderRecord findById(int id) 
+    }
+    class ProductQuery{
+      <<interface>>
+      +ProductQuery filterByIds(int[] ids)
+      +ProductQuery paginate(int perPage, int currentPage)
+      +ProductPaginator execute()
+    }
+    class ProductPaginator{
+      <<interface>>
+      +Product current()
+      +int total()
+      +int perPage()
+      +int currentPage()
+      +Product getById()
+    }
+    class Iterator{
+      <<interface>>
+    }
 ```
