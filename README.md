@@ -58,7 +58,7 @@ classDiagram
     Product <.. ProductPaginator
     Iterator <|-- ProductPaginator
     class Interactor{
-      +execute()
+      +execute(Input input)
     }
     class Input{
       +OrderItem[] items
