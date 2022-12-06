@@ -24,6 +24,7 @@ classDiagram
       +int quantity
     }
     class Order{
+      -int id
       -DateTime date
       -Item[] items
       -int customerUserId
@@ -43,6 +44,7 @@ classDiagram
       +notify()
     }
     class OrderRecord{
+      +int id
       +DateTime date
       +Item[] items
       +int customerUserId
