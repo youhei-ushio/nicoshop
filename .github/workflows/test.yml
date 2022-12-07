@@ -23,6 +23,5 @@ jobs:
       - name: composer install
         if: steps.cache.outputs.cache-hit != 'true'
         run: composer install -n --prefer-dist
-      - name: .env
       - name: unit test
         run: ./vendor/bin/phpunit
