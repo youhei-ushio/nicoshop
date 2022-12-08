@@ -21,7 +21,7 @@ final class Order
      * @param Order\Item[] $items
      */
     private function __construct(
-        private int|null $id,
+        private readonly int|null $id,
         private readonly DateTimeImmutable $date,
         private array $items,
         private readonly int $customerUserId,
