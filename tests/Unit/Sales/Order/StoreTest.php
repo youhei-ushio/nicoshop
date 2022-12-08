@@ -137,8 +137,6 @@ final class StoreTest extends TestCase
             $orderRepository,
             $this->createProductQuery(),
         );
-
-        // 実行
         $items = [];
         for ($i = 0; $i < 100; ++$i) {
             $items[] = [
@@ -146,6 +144,8 @@ final class StoreTest extends TestCase
                 'quantity' => 1,
             ];
         }
+
+        // 実行
         $interactor->execute(Input::fromArray([
             'items' => $items,
             'user_id' => 1,
@@ -168,8 +168,6 @@ final class StoreTest extends TestCase
             $orderRepository,
             $this->createProductQuery(),
         );
-
-        // 実行
         $items = [];
         for ($i = 0; $i < 100; ++$i) {
             $items[] = [
@@ -181,8 +179,39 @@ final class StoreTest extends TestCase
             'product_id' => 1234,
             'quantity' => 10,
         ];
+
+        // 実行
         $interactor->execute(Input::fromArray([
             'items' => $items,
+            'user_id' => 1,
+        ]));
+    }
+
+    public function testCannotOrderWithSameProducts(): void
+    {
+        // 検証内容設定
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectErrorMessage('The product has already been taken.');
+
+        // 前準備
+        $orderRepository = $this->createOrderRepository();
+        $interactor = new Interactor(
+            $orderRepository,
+            $this->createProductQuery(),
+        );
+
+        // 実行
+        $interactor->execute(Input::fromArray([
+            'items' => [
+                [
+                    'product_id' => 1234,
+                    'quantity' => 100,
+                ],
+                [
+                    'product_id' => 1234,
+                    'quantity' => 50,
+                ],
+            ],
             'user_id' => 1,
         ]));
     }
