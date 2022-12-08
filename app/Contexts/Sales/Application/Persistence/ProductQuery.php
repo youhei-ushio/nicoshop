@@ -13,5 +13,5 @@ interface ProductQuery
 
     public function paginate(int $perPage, int $currentPage): self;
 
-    public function execute(): ProductPaginator;
+    public function get(): ProductPaginator;
 }

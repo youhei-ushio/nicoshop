@@ -8,9 +8,9 @@ interface OrderQuery
 {
     public function onlyAccepted(): self;
 
-    public function onlyIncompleted(): self;
+    public function onlyUnfinished(): self;
 
     public function paginate(int $perPage, int $currentPage): self;
 
-    public function execute(): OrderPaginator;
+    public function get(): OrderPaginator;
 }

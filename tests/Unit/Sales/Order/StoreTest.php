@@ -143,7 +143,7 @@ final class StoreTest extends TestCase
                 return $this;
             }
 
-            public function execute(): ProductPaginator
+            public function get(): ProductPaginator
             {
                 $items = [
                     new Product(

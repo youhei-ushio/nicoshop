@@ -27,7 +27,7 @@ final class Interactor
             array_map(function (Input\OrderItem $orderItem) {
                 return $orderItem->productId;
             }, $input->items)
-        )->execute();
+        )->get();
 
         $order = Order::create($input->customerUserId);
         foreach ($input->items as $orderItem) {
