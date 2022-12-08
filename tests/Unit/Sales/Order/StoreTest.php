@@ -79,6 +79,31 @@ final class StoreTest extends TestCase
         ]));
     }
 
+    public function testCanOrderWithMaxQuantityItem(): void
+    {
+        // 前準備
+        $orderRepository = $this->createOrderRepository();
+        $interactor = new Interactor(
+            $orderRepository,
+            $this->createProductQuery(),
+        );
+
+        // 実行
+        $interactor->execute(Input::fromArray([
+            'items' => [
+                [
+                    'product_id' => 1234,
+                    'quantity' => 999999,
+                ],
+            ],
+            'user_id' => 1,
+        ]));
+
+        // 検証
+        $storedOrder = $orderRepository->findById(1);
+        $this->assertSame(999999, $storedOrder->items[0]->quantity);
+    }
+
     public function testCannotOrderWithLargeItem(): void
     {
         // 検証内容設定
@@ -97,9 +122,67 @@ final class StoreTest extends TestCase
             'items' => [
                 [
                     'product_id' => 1234,
-                    'quantity' => 3000000,
+                    'quantity' => 1000000,
                 ],
             ],
+            'user_id' => 1,
+        ]));
+    }
+
+    public function testCanOrderWithMaxItems(): void
+    {
+        // 前準備
+        $orderRepository = $this->createOrderRepository();
+        $interactor = new Interactor(
+            $orderRepository,
+            $this->createProductQuery(),
+        );
+
+        // 実行
+        $items = [];
+        for ($i = 0; $i < 100; ++$i) {
+            $items[] = [
+                'product_id' => $i + 1,
+                'quantity' => 1,
+            ];
+        }
+        $interactor->execute(Input::fromArray([
+            'items' => $items,
+            'user_id' => 1,
+        ]));
+
+        // 検証
+        $storedOrder = $orderRepository->findById(1);
+        $this->assertSame(100, count($storedOrder->items));
+    }
+
+    public function testCannotOrderWithTooManyItems(): void
+    {
+        // 検証内容設定
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectErrorMessage('The order must not have more than 100 items.');
+
+        // 前準備
+        $orderRepository = $this->createOrderRepository();
+        $interactor = new Interactor(
+            $orderRepository,
+            $this->createProductQuery(),
+        );
+
+        // 実行
+        $items = [];
+        for ($i = 0; $i < 100; ++$i) {
+            $items[] = [
+                'product_id' => $i + 1,
+                'quantity' => 1,
+            ];
+        }
+        $items[] = [
+            'product_id' => 1234,
+            'quantity' => 10,
+        ];
+        $interactor->execute(Input::fromArray([
+            'items' => $items,
             'user_id' => 1,
         ]));
     }
@@ -162,6 +245,16 @@ final class StoreTest extends TestCase
                         350,
                     ),
                 ];
+
+                // 大量の明細向け
+                for ($i = 0; $i < 100; ++$i) {
+                    $items[] = new Product(
+                        $i + 1,
+                        "ガムNo.$i",
+                        $i * 10,
+                    );
+                }
+
                 return new class($items) extends ArrayIterator implements ProductPaginator
                 {
                     public function __construct(private readonly array $items)
