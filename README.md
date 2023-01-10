@@ -14,6 +14,7 @@ classDiagram
     Product <.. Order
     OrderCreated <.. Order
     OrderRecord <.. Order
+    Item *-- OrderRecord
     OrderRepository <.. Order
     class Product{
       +int id
