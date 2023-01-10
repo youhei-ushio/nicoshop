@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Contexts\Sales\Domain\Entity;
 
-use App\Contexts\Sales\Domain\Notification\OrderCreated;
+use App\Contexts\Sales\Domain\Event\OrderCreated;
+use App\Contexts\Sales\Domain\Event\OrderNotYetAccepted;
+use App\Contexts\Sales\Domain\Persistence\EventChannel;
 use App\Contexts\Sales\Domain\Persistence\OrderRecord;
 use App\Contexts\Sales\Domain\Persistence\OrderRepository;
 use App\Contexts\Sales\Domain\Value\Product;
@@ -21,7 +23,7 @@ final class Order
      * @param Order\Item[] $items
      */
     private function __construct(
-        private readonly int|null $id,
+        private int|null $id,
         private readonly DateTimeImmutable $date,
         private array $items,
         private readonly int $customerUserId,
@@ -80,14 +82,20 @@ final class Order
     /**
      * 受付リマインド
      */
-    public function remind(OrderCreated $created): void
+    public function remind(EventChannel $eventChannel): void
     {
         if ($this->accepted || $this->finished) {
             return;
         }
         $now = new DateTimeImmutable();
         if ($now > $this->date->modify('tomorrow')) {
-            $created->notify();
+            // 注文後に未受付のまま1日経過したらリマインド
+            $eventChannel->publish(new OrderNotYetAccepted(
+                id: $this->id,
+                date: $this->date,
+                items: $this->items,
+                customerUserId: $this->customerUserId,
+            ));
         }
     }
 
@@ -110,13 +118,13 @@ final class Order
     /**
      * 永続化
      */
-    public function save(OrderRepository $repository): void
+    public function save(OrderRepository $repository, EventChannel $eventChannel): void
     {
         if (empty($this->items)) {
             // 注文には1つ以上の明細が必要
             throw new InvalidArgumentException('Cannot order without items');
         }
-        $repository->save(new OrderRecord(
+        $id = $repository->save(new OrderRecord(
             id: $this->id,
             date: $this->date,
             items: $this->items,
@@ -124,6 +132,17 @@ final class Order
             accepted: $this->accepted,
             finished: $this->finished,
         ));
+        if ($this->id === null) {
+            $eventChannel->publish(
+                new OrderCreated(
+                    id: $id,
+                    date: $this->date,
+                    items: $this->items,
+                    customerUserId: $this->customerUserId,
+                )
+            );
+        }
+        $this->id = $id;
     }
 
     /**

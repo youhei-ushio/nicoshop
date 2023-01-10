@@ -4,27 +4,23 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Sales\Order;
 
-use App\Contexts\Sales\Application\Persistence\ProductPaginator;
 use App\Contexts\Sales\Application\Persistence\ProductQuery;
 use App\Contexts\Sales\Application\UseCase\Order\Store\Input;
 use App\Contexts\Sales\Application\UseCase\Order\Store\Interactor;
-use App\Contexts\Sales\Domain\Persistence\OrderRecord;
-use App\Contexts\Sales\Domain\Persistence\OrderRepository;
 use App\Contexts\Sales\Domain\Value\Product;
-use ArrayIterator;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
 
 final class StoreTest extends TestCase
 {
     public function testCanOrder(): void
     {
         // 前準備
-        $orderRepository = $this->createOrderRepository();
+        $orderRepository = new OrderRepositoryMock();
         $interactor = new Interactor(
             $orderRepository,
             $this->createProductQuery(),
+            new EventChannelMock(),
         );
 
         // 実行
@@ -46,8 +42,7 @@ final class StoreTest extends TestCase
             'user_id' => 1,
         ]));
 
-        // 検証
-        $storedOrder = $orderRepository->findById(1);
+        $storedOrder = current($orderRepository->toArray());
         $this->assertSame(1234, $storedOrder->items[0]->product->id);
         $this->assertSame('ポテチ', $storedOrder->items[0]->product->name);
         $this->assertSame(100, $storedOrder->items[0]->quantity);
@@ -66,10 +61,11 @@ final class StoreTest extends TestCase
         $this->expectErrorMessage('Cannot order without items');
 
         // 前準備
-        $orderRepository = $this->createOrderRepository();
+        $orderRepository = new OrderRepositoryMock();
         $interactor = new Interactor(
             $orderRepository,
             $this->createProductQuery(),
+            new EventChannelMock(),
         );
 
         // 実行
@@ -82,10 +78,11 @@ final class StoreTest extends TestCase
     public function testCanOrderWithMaxQuantityItem(): void
     {
         // 前準備
-        $orderRepository = $this->createOrderRepository();
+        $orderRepository = new OrderRepositoryMock();
         $interactor = new Interactor(
             $orderRepository,
             $this->createProductQuery(),
+            new EventChannelMock(),
         );
 
         // 実行
@@ -100,7 +97,7 @@ final class StoreTest extends TestCase
         ]));
 
         // 検証
-        $storedOrder = $orderRepository->findById(1);
+        $storedOrder = current($orderRepository->toArray());
         $this->assertSame(999999, $storedOrder->items[0]->quantity);
     }
 
@@ -111,10 +108,11 @@ final class StoreTest extends TestCase
         $this->expectErrorMessage('The item quantity must not have more than 1000000.');
 
         // 前準備
-        $orderRepository = $this->createOrderRepository();
+        $orderRepository = new OrderRepositoryMock();
         $interactor = new Interactor(
             $orderRepository,
             $this->createProductQuery(),
+            new EventChannelMock(),
         );
 
         // 実行
@@ -132,10 +130,11 @@ final class StoreTest extends TestCase
     public function testCanOrderWithMaxItems(): void
     {
         // 前準備
-        $orderRepository = $this->createOrderRepository();
+        $orderRepository = new OrderRepositoryMock();
         $interactor = new Interactor(
             $orderRepository,
             $this->createProductQuery(),
+            new EventChannelMock(),
         );
         $items = [];
         for ($i = 0; $i < 100; ++$i) {
@@ -152,7 +151,7 @@ final class StoreTest extends TestCase
         ]));
 
         // 検証
-        $storedOrder = $orderRepository->findById(1);
+        $storedOrder = current($orderRepository->toArray());
         $this->assertSame(100, count($storedOrder->items));
     }
 
@@ -163,10 +162,11 @@ final class StoreTest extends TestCase
         $this->expectErrorMessage('The order must not have more than 100 items.');
 
         // 前準備
-        $orderRepository = $this->createOrderRepository();
+        $orderRepository = new OrderRepositoryMock();
         $interactor = new Interactor(
             $orderRepository,
             $this->createProductQuery(),
+            new EventChannelMock(),
         );
         $items = [];
         for ($i = 0; $i < 100; ++$i) {
@@ -194,10 +194,11 @@ final class StoreTest extends TestCase
         $this->expectErrorMessage('The product has already been taken.');
 
         // 前準備
-        $orderRepository = $this->createOrderRepository();
+        $orderRepository = new OrderRepositoryMock();
         $interactor = new Interactor(
             $orderRepository,
             $this->createProductQuery(),
+            new EventChannelMock(),
         );
 
         // 実行
@@ -219,109 +220,34 @@ final class StoreTest extends TestCase
     /**
      * Infrastructure Mock
      */
-    private function createOrderRepository(): OrderRepository
-    {
-        return new class() implements OrderRepository
-        {
-            private array $records = [];
-            private int $id = 0;
-
-            public function save(OrderRecord $record): void
-            {
-                $this->records[++$this->id] = $record;
-            }
-
-            public function findById(int $id): OrderRecord
-            {
-                return $this->records[$id];
-            }
-        };
-    }
-
-    /**
-     * Infrastructure Mock
-     */
     private function createProductQuery(): ProductQuery
     {
-        return new class() implements ProductQuery
-        {
-            public function filterByIds(array $ids): ProductQuery
-            {
-                return $this;
-            }
+        $items = [
+            new Product(
+                1234,
+                'ポテチ',
+                130,
+            ),
+            new Product(
+                555,
+                'プリン',
+                100,
+            ),
+            new Product(
+                778899,
+                '高級アイス',
+                350,
+            ),
+        ];
 
-            public function paginate(int $perPage, int $currentPage): ProductQuery
-            {
-                return $this;
-            }
-
-            public function get(): ProductPaginator
-            {
-                $items = [
-                    new Product(
-                        1234,
-                        'ポテチ',
-                        130,
-                    ),
-                    new Product(
-                        555,
-                        'プリン',
-                        100,
-                    ),
-                    new Product(
-                        778899,
-                        '高級アイス',
-                        350,
-                    ),
-                ];
-
-                // 大量の明細向け
-                for ($i = 0; $i < 100; ++$i) {
-                    $items[] = new Product(
-                        $i + 1,
-                        "ガムNo.$i",
-                        $i * 10,
-                    );
-                }
-
-                return new class($items) extends ArrayIterator implements ProductPaginator
-                {
-                    public function __construct(private readonly array $items)
-                    {
-                        parent::__construct($items);
-                    }
-
-                    public function current(): Product
-                    {
-                        return parent::current();
-                    }
-
-                    public function total(): int
-                    {
-                        return count($this->items);
-                    }
-
-                    public function perPage(): int
-                    {
-                        return 100;
-                    }
-
-                    public function currentPage(): int
-                    {
-                        return 1;
-                    }
-
-                    public function getById(int $id): Product
-                    {
-                        foreach ($this as $product) {
-                            if ($product->id === $id) {
-                                return $product;
-                            }
-                        }
-                        throw new RuntimeException('not found');
-                    }
-                };
-            }
-        };
+        // 大量の明細向け
+        for ($i = 0; $i < 100; ++$i) {
+            $items[] = new Product(
+                $i + 1,
+                "ガムNo.$i",
+                $i * 10,
+            );
+        }
+        return new ProductQueryMock($items);
     }
 }

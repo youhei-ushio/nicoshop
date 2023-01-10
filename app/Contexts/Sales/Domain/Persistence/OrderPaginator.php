@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace App\Contexts\Sales\Domain\Persistence;
 
 use App\Contexts\Sales\Domain\Entity\Order;
+use Iterator;
 
-interface OrderRepository
+interface OrderPaginator extends Iterator
 {
-    public function save(OrderRecord $record): int;
-
-    public function findById(int $id): Order;
+    public function current(): Order;
 }

@@ -6,6 +6,7 @@ namespace App\Contexts\Sales\Application\UseCase\Order\Store;
 
 use App\Contexts\Sales\Application\Persistence\ProductQuery;
 use App\Contexts\Sales\Domain\Entity\Order;
+use App\Contexts\Sales\Domain\Persistence\EventChannel;
 use App\Contexts\Sales\Domain\Persistence\OrderRepository;
 
 /**
@@ -16,6 +17,7 @@ final class Interactor
     public function __construct(
         private readonly OrderRepository $orderRepository,
         private readonly ProductQuery $productQuery,
+        private readonly EventChannel $eventChannel,
     )
     {
 
@@ -33,6 +35,6 @@ final class Interactor
         foreach ($input->items as $orderItem) {
             $order->add($products->getById($orderItem->productId), $orderItem->quantity);
         }
-        $order->save($this->orderRepository);
+        $order->save($this->orderRepository, $this->eventChannel);
     }
 }
