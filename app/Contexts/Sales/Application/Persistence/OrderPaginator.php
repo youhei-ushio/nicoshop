@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace App\Contexts\Sales\Application\Persistence;
 
-interface OrderPaginator
+use Iterator;
+
+/**
+ * アプリケーションで利用する注文クエリ
+ */
+interface OrderPaginator extends Iterator
 {
     public function current(): OrderQueryResult;
 
