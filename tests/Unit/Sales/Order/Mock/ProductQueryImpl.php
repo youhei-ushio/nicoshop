@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Sales\Order;
+namespace Tests\Unit\Sales\Order\Mock;
 
 use App\Contexts\Sales\Application\Persistence\ProductPaginator;
 use App\Contexts\Sales\Application\Persistence\ProductQuery;
@@ -10,7 +10,7 @@ use App\Contexts\Sales\Domain\Value\Product;
 use ArrayIterator;
 use RuntimeException;
 
-final class ProductQueryMock implements ProductQuery
+final class ProductQueryImpl implements ProductQuery
 {
     private array $filterIds = [];
     private int $perPage = 1000;

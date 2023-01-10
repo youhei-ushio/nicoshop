@@ -7,20 +7,38 @@ namespace Tests\Unit\Sales\Order;
 use App\Contexts\Sales\Application\Persistence\ProductQuery;
 use App\Contexts\Sales\Application\UseCase\Order\Store\Input;
 use App\Contexts\Sales\Application\UseCase\Order\Store\Interactor;
+use App\Contexts\Sales\Domain\Event\OrderCreated;
 use App\Contexts\Sales\Domain\Value\Product;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
 final class StoreTest extends TestCase
 {
+    /**
+     * @testdox 注文が作成できること
+     */
     public function testCanOrder(): void
     {
         // 前準備
-        $orderRepository = new OrderRepositoryMock();
+        $eventChannel = new Mock\EventChannelImpl();
+        $subscriber = new class()
+        {
+            public function __construct(public bool $created = false)
+            {
+
+            }
+
+            public function __invoke(OrderCreated $event): void
+            {
+                $this->created = true;
+            }
+        };
+        $eventChannel->subscribe(OrderCreated::class, $subscriber);
+        $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
             $orderRepository,
             $this->createProductQuery(),
-            new EventChannelMock(),
+            $eventChannel,
         );
 
         // 実行
@@ -42,6 +60,8 @@ final class StoreTest extends TestCase
             'user_id' => 1,
         ]));
 
+        // 検証
+        $this->assertTrue($subscriber->created);
         $storedOrder = current($orderRepository->toArray());
         $this->assertSame(1234, $storedOrder->items[0]->product->id);
         $this->assertSame('ポテチ', $storedOrder->items[0]->product->name);
@@ -54,6 +74,9 @@ final class StoreTest extends TestCase
         $this->assertSame(99999, $storedOrder->items[2]->quantity);
     }
 
+    /**
+     * @testdox 明細の無い注文は作成できないこと
+     */
     public function testCannotOrderWithoutItems(): void
     {
         // 検証内容設定
@@ -61,11 +84,12 @@ final class StoreTest extends TestCase
         $this->expectErrorMessage('Cannot order without items');
 
         // 前準備
-        $orderRepository = new OrderRepositoryMock();
+        $eventChannel = new Mock\EventChannelImpl();
+        $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
             $orderRepository,
             $this->createProductQuery(),
-            new EventChannelMock(),
+            $eventChannel,
         );
 
         // 実行
@@ -75,14 +99,18 @@ final class StoreTest extends TestCase
         ]));
     }
 
+    /**
+     * @testdox 数量が最大値の明細を持つ注文を作成できること
+     */
     public function testCanOrderWithMaxQuantityItem(): void
     {
         // 前準備
-        $orderRepository = new OrderRepositoryMock();
+        $eventChannel = new Mock\EventChannelImpl();
+        $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
             $orderRepository,
             $this->createProductQuery(),
-            new EventChannelMock(),
+            $eventChannel,
         );
 
         // 実行
@@ -101,6 +129,9 @@ final class StoreTest extends TestCase
         $this->assertSame(999999, $storedOrder->items[0]->quantity);
     }
 
+    /**
+     * @testdox 数量の最大値を超える明細は追加できないこと
+     */
     public function testCannotOrderWithLargeItem(): void
     {
         // 検証内容設定
@@ -108,11 +139,12 @@ final class StoreTest extends TestCase
         $this->expectErrorMessage('The item quantity must not have more than 1000000.');
 
         // 前準備
-        $orderRepository = new OrderRepositoryMock();
+        $eventChannel = new Mock\EventChannelImpl();
+        $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
             $orderRepository,
             $this->createProductQuery(),
-            new EventChannelMock(),
+            $eventChannel,
         );
 
         // 実行
@@ -127,14 +159,18 @@ final class StoreTest extends TestCase
         ]));
     }
 
+    /**
+     * @testdox 明細を最大数まで追加できること
+     */
     public function testCanOrderWithMaxItems(): void
     {
         // 前準備
-        $orderRepository = new OrderRepositoryMock();
+        $eventChannel = new Mock\EventChannelImpl();
+        $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
             $orderRepository,
             $this->createProductQuery(),
-            new EventChannelMock(),
+            $eventChannel,
         );
         $items = [];
         for ($i = 0; $i < 100; ++$i) {
@@ -155,6 +191,9 @@ final class StoreTest extends TestCase
         $this->assertSame(100, count($storedOrder->items));
     }
 
+    /**
+     * @testdox 最大数を超える明細は追加できないこと
+     */
     public function testCannotOrderWithTooManyItems(): void
     {
         // 検証内容設定
@@ -162,11 +201,12 @@ final class StoreTest extends TestCase
         $this->expectErrorMessage('The order must not have more than 100 items.');
 
         // 前準備
-        $orderRepository = new OrderRepositoryMock();
+        $eventChannel = new Mock\EventChannelImpl();
+        $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
             $orderRepository,
             $this->createProductQuery(),
-            new EventChannelMock(),
+            $eventChannel,
         );
         $items = [];
         for ($i = 0; $i < 100; ++$i) {
@@ -187,6 +227,9 @@ final class StoreTest extends TestCase
         ]));
     }
 
+    /**
+     * @testdox 同じ商品を複数の明細で追加できないこと
+     */
     public function testCannotOrderWithSameProducts(): void
     {
         // 検証内容設定
@@ -194,11 +237,12 @@ final class StoreTest extends TestCase
         $this->expectErrorMessage('The product has already been taken.');
 
         // 前準備
-        $orderRepository = new OrderRepositoryMock();
+        $eventChannel = new Mock\EventChannelImpl();
+        $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
             $orderRepository,
             $this->createProductQuery(),
-            new EventChannelMock(),
+            $eventChannel,
         );
 
         // 実行
@@ -248,6 +292,6 @@ final class StoreTest extends TestCase
                 $i * 10,
             );
         }
-        return new ProductQueryMock($items);
+        return new Mock\ProductQueryImpl($items);
     }
 }

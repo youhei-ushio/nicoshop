@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Contexts\Sales\Domain\Entity;
 
+use App\Contexts\Sales\Domain\Event\OrderAccepted;
+use App\Contexts\Sales\Domain\Event\OrderFinished;
 use App\Contexts\Sales\Domain\Event\OrderCreated;
 use App\Contexts\Sales\Domain\Event\OrderNotYetAccepted;
 use App\Contexts\Sales\Domain\Persistence\EventChannel;
@@ -29,6 +31,7 @@ final class Order
         private readonly int $customerUserId,
         private bool $accepted,
         private bool $finished,
+        private readonly EventChannel $eventChannel,
     )
     {
 
@@ -36,6 +39,7 @@ final class Order
 
     public static function create(
         int $customerUserId,
+        EventChannel $eventChannel,
     ): self
     {
         return new self(
@@ -45,6 +49,7 @@ final class Order
             customerUserId: $customerUserId,
             accepted: false, // 未受付
             finished: false, // 未完了
+            eventChannel: $eventChannel,
         );
     }
 
@@ -77,12 +82,19 @@ final class Order
             throw new BadMethodCallException('The order has already been accepted.');
         }
         $this->accepted = true;
+
+        $this->eventChannel->publish(new OrderAccepted(
+            id: $this->id,
+            date: $this->date,
+            items: $this->items,
+            customerUserId: $this->customerUserId,
+        ));
     }
 
     /**
      * 受付リマインド
      */
-    public function remind(EventChannel $eventChannel): void
+    public function remind(): void
     {
         if ($this->accepted || $this->finished) {
             return;
@@ -90,7 +102,7 @@ final class Order
         $now = new DateTimeImmutable();
         if ($now > $this->date->modify('tomorrow')) {
             // 注文後に未受付のまま1日経過したらリマインド
-            $eventChannel->publish(new OrderNotYetAccepted(
+            $this->eventChannel->publish(new OrderNotYetAccepted(
                 id: $this->id,
                 date: $this->date,
                 items: $this->items,
@@ -113,12 +125,21 @@ final class Order
             throw new BadMethodCallException('The order has already done.');
         }
         $this->finished = true;
+
+        $this->eventChannel->publish(
+            new OrderFinished(
+                id: $this->id,
+                date: $this->date,
+                items: $this->items,
+                customerUserId: $this->customerUserId,
+            )
+        );
     }
 
     /**
      * 永続化
      */
-    public function save(OrderRepository $repository, EventChannel $eventChannel): void
+    public function save(OrderRepository $repository): void
     {
         if (empty($this->items)) {
             // 注文には1つ以上の明細が必要
@@ -133,7 +154,8 @@ final class Order
             finished: $this->finished,
         ));
         if ($this->id === null) {
-            $eventChannel->publish(
+            // 永続化が完了しないとIDが確定しないためイベント発行はこのタイミングになる
+            $this->eventChannel->publish(
                 new OrderCreated(
                     id: $id,
                     date: $this->date,
@@ -148,7 +170,7 @@ final class Order
     /**
      * 永続化データの復元
      */
-    public static function restore(OrderRecord $record): self
+    public static function restore(OrderRecord $record, EventChannel $eventChannel): self
     {
         return new self(
             id: $record->id,
@@ -157,6 +179,7 @@ final class Order
             customerUserId: $record->customerUserId,
             accepted: $record->accepted,
             finished: $record->finished,
+            eventChannel: $eventChannel,
         );
     }
 

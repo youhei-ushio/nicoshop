@@ -31,10 +31,10 @@ final class Interactor
             }, $input->items)
         )->get();
 
-        $order = Order::create($input->customerUserId);
+        $order = Order::create($input->customerUserId, $this->eventChannel);
         foreach ($input->items as $orderItem) {
             $order->add($products->getById($orderItem->productId), $orderItem->quantity);
         }
-        $order->save($this->orderRepository, $this->eventChannel);
+        $order->save($this->orderRepository);
     }
 }

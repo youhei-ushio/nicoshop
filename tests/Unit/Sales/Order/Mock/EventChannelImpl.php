@@ -2,21 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Sales\Order;
+namespace Tests\Unit\Sales\Order\Mock;
 
+use App\Contexts\Sales\Domain\Event\OrderAccepted;
 use App\Contexts\Sales\Domain\Event\OrderCreated;
+use App\Contexts\Sales\Domain\Event\OrderFinished;
 use App\Contexts\Sales\Domain\Event\OrderNotYetAccepted;
 use App\Contexts\Sales\Domain\Persistence\EventChannel;
 
-final class EventChannelMock implements EventChannel
+final class EventChannelImpl implements EventChannel
 {
-    private OrderCreated|OrderNotYetAccepted|null $publishedEvent = null;
-
     private array $subscribers = [];
 
-    public function publish(OrderCreated|OrderNotYetAccepted $event): void
+    public function publish(OrderCreated|OrderAccepted|OrderNotYetAccepted|OrderFinished $event): void
     {
-        $this->publishedEvent = $event;
         $eventName = get_class($event);
         foreach ($this->subscribers[$eventName] ?? [] as $subscriber) {
             $subscriber($event);
@@ -26,10 +25,5 @@ final class EventChannelMock implements EventChannel
     public function subscribe(string $eventName, callable $subscriber): void
     {
         $this->subscribers[$eventName][] = $subscriber;
-    }
-
-    public function lastPublishedEvent(): OrderCreated|OrderNotYetAccepted
-    {
-        return $this->publishedEvent;
     }
 }

@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Sales\Order;
+namespace Tests\Unit\Sales\Order\Mock;
 
 use App\Contexts\Sales\Domain\Entity\Order;
+use App\Contexts\Sales\Domain\Persistence\EventChannel;
 use App\Contexts\Sales\Domain\Persistence\NotAcceptedOrderRepository;
 use App\Contexts\Sales\Domain\Persistence\OrderPaginator;
 use App\Contexts\Sales\Domain\Persistence\OrderRecord;
@@ -12,13 +13,16 @@ use App\Contexts\Sales\Domain\Value\Product;
 use DateTimeImmutable;
 use Generator;
 use IteratorIterator;
+use Traversable;
 
-final class NotAcceptedOrderRepositoryMock implements NotAcceptedOrderRepository
+final class NotAcceptedOrderRepositoryImpl implements NotAcceptedOrderRepository
 {
     /** @var OrderRecord[] $orders */
     private readonly array $orders;
 
-    public function __construct()
+    public function __construct(
+        private readonly EventChannel $eventChannel,
+    )
     {
         // 件数多めにしておく
         $orders = [];
@@ -62,11 +66,16 @@ final class NotAcceptedOrderRepositoryMock implements NotAcceptedOrderRepository
 
     public function find(): OrderPaginator
     {
-        return new class($this->paginate()) extends IteratorIterator implements OrderPaginator
+        return new class($this->paginate(), $this->eventChannel) extends IteratorIterator implements OrderPaginator
         {
+            public function __construct(Traversable $iterator, private readonly EventChannel $eventChannel)
+            {
+                parent::__construct($iterator);
+            }
+
             public function current(): Order
             {
-                return Order::restore(parent::current());
+                return Order::restore(parent::current(), $this->eventChannel);
             }
         };
     }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Contexts\Sales\Application\UseCase\Order\Accept;
+namespace App\Contexts\Sales\Application\UseCase\Order\Done;
 
 use App\Contexts\Sales\Domain\Persistence\OrderRepository;
 
@@ -21,7 +21,7 @@ final class Interactor
     public function execute(Input $input): void
     {
         $order = $this->orderRepository->findById($input->id);
-        $order->accept();
+        $order->done();
         $order->save($this->orderRepository);
     }
 }
