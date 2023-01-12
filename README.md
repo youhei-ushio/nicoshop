@@ -54,6 +54,7 @@ classDiagram
       +bool finished
     }
     class OrderFactory {
+      <<interface>>
       +Order create(int customerUserId, array products)
     }
     class OrderRepository{
