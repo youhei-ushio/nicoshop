@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Sales\Order;
 
-use App\Contexts\Sales\Application\Persistence\ProductQuery;
 use App\Contexts\Sales\Application\UseCase\Order\Store\Input;
 use App\Contexts\Sales\Application\UseCase\Order\Store\Interactor;
 use App\Contexts\Sales\Domain\Event\OrderCreated;
-use App\Contexts\Sales\Domain\Value\Product;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
@@ -34,11 +32,11 @@ final class StoreTest extends TestCase
             }
         };
         $eventChannel->subscribe(OrderCreated::class, $subscriber);
+        $orderFactory = new Mock\OrderFactoryImpl($eventChannel);
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
+            $orderFactory,
             $orderRepository,
-            $this->createProductQuery(),
-            $eventChannel,
         );
 
         // 実行
@@ -64,14 +62,11 @@ final class StoreTest extends TestCase
         $this->assertTrue($subscriber->created);
         $storedOrder = current($orderRepository->toArray());
         $this->assertSame(1234, $storedOrder->items[0]->product->id);
-        $this->assertSame('ポテチ', $storedOrder->items[0]->product->name);
-        $this->assertSame(100, $storedOrder->items[0]->quantity);
+        $this->assertSame(100, $storedOrder->items[0]->product->quantity);
         $this->assertSame(555, $storedOrder->items[1]->product->id);
-        $this->assertSame('プリン', $storedOrder->items[1]->product->name);
-        $this->assertSame(1, $storedOrder->items[1]->quantity);
+        $this->assertSame(1, $storedOrder->items[1]->product->quantity);
         $this->assertSame(778899, $storedOrder->items[2]->product->id);
-        $this->assertSame('高級アイス', $storedOrder->items[2]->product->name);
-        $this->assertSame(99999, $storedOrder->items[2]->quantity);
+        $this->assertSame(99999, $storedOrder->items[2]->product->quantity);
     }
 
     /**
@@ -81,15 +76,15 @@ final class StoreTest extends TestCase
     {
         // 検証内容設定
         $this->expectException(InvalidArgumentException::class);
-        $this->expectErrorMessage('Cannot order without items');
+        $this->expectErrorMessage('Cannot order without products');
 
         // 前準備
         $eventChannel = new Mock\EventChannelImpl();
+        $orderFactory = new Mock\OrderFactoryImpl($eventChannel);
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
+            $orderFactory,
             $orderRepository,
-            $this->createProductQuery(),
-            $eventChannel,
         );
 
         // 実行
@@ -106,11 +101,11 @@ final class StoreTest extends TestCase
     {
         // 前準備
         $eventChannel = new Mock\EventChannelImpl();
+        $orderFactory = new Mock\OrderFactoryImpl($eventChannel);
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
+            $orderFactory,
             $orderRepository,
-            $this->createProductQuery(),
-            $eventChannel,
         );
 
         // 実行
@@ -126,7 +121,7 @@ final class StoreTest extends TestCase
 
         // 検証
         $storedOrder = current($orderRepository->toArray());
-        $this->assertSame(999999, $storedOrder->items[0]->quantity);
+        $this->assertSame(999999, $storedOrder->items[0]->product->quantity);
     }
 
     /**
@@ -140,11 +135,11 @@ final class StoreTest extends TestCase
 
         // 前準備
         $eventChannel = new Mock\EventChannelImpl();
+        $orderFactory = new Mock\OrderFactoryImpl($eventChannel);
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
+            $orderFactory,
             $orderRepository,
-            $this->createProductQuery(),
-            $eventChannel,
         );
 
         // 実行
@@ -166,11 +161,11 @@ final class StoreTest extends TestCase
     {
         // 前準備
         $eventChannel = new Mock\EventChannelImpl();
+        $orderFactory = new Mock\OrderFactoryImpl($eventChannel);
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
+            $orderFactory,
             $orderRepository,
-            $this->createProductQuery(),
-            $eventChannel,
         );
         $items = [];
         for ($i = 0; $i < 100; ++$i) {
@@ -202,11 +197,11 @@ final class StoreTest extends TestCase
 
         // 前準備
         $eventChannel = new Mock\EventChannelImpl();
+        $orderFactory = new Mock\OrderFactoryImpl($eventChannel);
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
+            $orderFactory,
             $orderRepository,
-            $this->createProductQuery(),
-            $eventChannel,
         );
         $items = [];
         for ($i = 0; $i < 100; ++$i) {
@@ -238,11 +233,11 @@ final class StoreTest extends TestCase
 
         // 前準備
         $eventChannel = new Mock\EventChannelImpl();
+        $orderFactory = new Mock\OrderFactoryImpl($eventChannel);
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
+            $orderFactory,
             $orderRepository,
-            $this->createProductQuery(),
-            $eventChannel,
         );
 
         // 実行
@@ -259,39 +254,5 @@ final class StoreTest extends TestCase
             ],
             'user_id' => 1,
         ]));
-    }
-
-    /**
-     * Infrastructure Mock
-     */
-    private function createProductQuery(): ProductQuery
-    {
-        $items = [
-            new Product(
-                1234,
-                'ポテチ',
-                130,
-            ),
-            new Product(
-                555,
-                'プリン',
-                100,
-            ),
-            new Product(
-                778899,
-                '高級アイス',
-                350,
-            ),
-        ];
-
-        // 大量の明細向け
-        for ($i = 0; $i < 100; ++$i) {
-            $items[] = new Product(
-                $i + 1,
-                "ガムNo.$i",
-                $i * 10,
-            );
-        }
-        return new Mock\ProductQueryImpl($items);
     }
 }

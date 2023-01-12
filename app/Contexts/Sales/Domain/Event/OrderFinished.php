@@ -9,7 +9,7 @@ use DateTimeImmutable;
 final class OrderFinished
 {
     public function __construct(
-        public readonly int $id,
+        public readonly string $id,
         public readonly DateTimeImmutable $date,
         public array $items,
         public readonly int $customerUserId,

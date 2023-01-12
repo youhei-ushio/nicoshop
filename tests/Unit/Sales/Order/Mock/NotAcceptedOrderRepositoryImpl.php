@@ -29,16 +29,14 @@ final class NotAcceptedOrderRepositoryImpl implements OrderRepository
         $orders = [];
         for ($i = 0; $i < 10000; $i++) {
             $orders[] = new OrderRecord(
-                id: $i + 1,
+                id: uniqid(prefix: "test$i", more_entropy: true),
                 date: new DateTimeImmutable($i > 9000 ? 'now' : '2 days ago'), // 1000件だけ注文直後にしておく
                 items: [
                     new Order\Item(
                         product: new Product(
                             id: 9000 + $i,
-                            name: "test$i",
-                            unitPrice: 100,
+                            quantity: 1,
                         ),
-                        quantity: 1,
                     ),
                 ],
                 customerUserId: 1,
@@ -65,12 +63,12 @@ final class NotAcceptedOrderRepositoryImpl implements OrderRepository
         } while ($currentPage <= $lastPage);
     }
 
-    public function save(OrderRecord $record): int
+    public function save(Order $order): void
     {
         throw new BadMethodCallException('Unused');
     }
 
-    public function findById(int $id): Order
+    public function findById(string $id): Order
     {
         throw new BadMethodCallException('Unused');
     }

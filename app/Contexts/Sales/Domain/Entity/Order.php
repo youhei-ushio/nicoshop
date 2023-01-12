@@ -10,7 +10,6 @@ use App\Contexts\Sales\Domain\Event\OrderCreated;
 use App\Contexts\Sales\Domain\Event\OrderNotYetAccepted;
 use App\Contexts\Sales\Domain\Persistence\EventChannel;
 use App\Contexts\Sales\Domain\Persistence\OrderRecord;
-use App\Contexts\Sales\Domain\Persistence\OrderRepository;
 use App\Contexts\Sales\Domain\Value\Product;
 use BadMethodCallException;
 use DateTimeImmutable;
@@ -25,10 +24,10 @@ final class Order
      * @param Order\Item[] $items
      */
     private function __construct(
-        private int|null $id,
+        private readonly string $id,
         private readonly DateTimeImmutable $date,
-        private array $items,
         private readonly int $customerUserId,
+        private array $items,
         private bool $accepted,
         private bool $finished,
         private readonly EventChannel $eventChannel,
@@ -37,28 +36,11 @@ final class Order
 
     }
 
-    public static function create(
-        int $customerUserId,
-        EventChannel $eventChannel,
-    ): self
-    {
-        return new self(
-            id: null, // 永続化まではID無し
-            date: new DateTimeImmutable(), // 当日
-            items: [],
-            customerUserId: $customerUserId,
-            accepted: false, // 未受付
-            finished: false, // 未完了
-            eventChannel: $eventChannel,
-        );
-    }
-
     /**
      * 明細追加
      */
     public function add(
         Product $product,
-        int $quantity,
     ): void
     {
         if (count($this->items) >= 100) {
@@ -69,7 +51,7 @@ final class Order
             // 商品は重複不可
             throw new InvalidArgumentException('The product has already been taken.');
         }
-        $this->items[] = new Order\Item($product, $quantity);
+        $this->items[] = new Order\Item($product);
     }
 
     /**
@@ -137,34 +119,41 @@ final class Order
     }
 
     /**
-     * 永続化
+     * @param Product[] $products
+     * @see OrderFactory
      */
-    public function save(OrderRepository $repository): void
+    public static function create(
+        string $id,
+        int $customerUserId,
+        array $products,
+        EventChannel $eventChannel,
+    ): self
     {
-        if (empty($this->items)) {
-            // 注文には1つ以上の明細が必要
-            throw new InvalidArgumentException('Cannot order without items');
+        if (empty($products)) {
+            // 注文には1つ以上の商品が必要
+            throw new InvalidArgumentException('Cannot order without products');
         }
-        $id = $repository->save(new OrderRecord(
-            id: $this->id,
-            date: $this->date,
-            items: $this->items,
-            customerUserId: $this->customerUserId,
-            accepted: $this->accepted,
-            finished: $this->finished,
-        ));
-        if ($this->id === null) {
-            // 永続化が完了しないとIDが確定しないためイベント発行はこのタイミングになる
-            $this->eventChannel->publish(
-                new OrderCreated(
-                    id: $id,
-                    date: $this->date,
-                    items: $this->items,
-                    customerUserId: $this->customerUserId,
-                )
-            );
+        $order = new self(
+            id: $id,
+            date: new DateTimeImmutable(), // 当日
+            customerUserId: $customerUserId,
+            items: [],
+            accepted: false, // 未受付
+            finished: false, // 未完了
+            eventChannel: $eventChannel,
+        );
+        foreach ($products as $product) {
+            $order->add($product);
         }
-        $this->id = $id;
+        $eventChannel->publish(
+            new OrderCreated(
+                id: $order->id,
+                date: $order->date,
+                items: $order->items,
+                customerUserId: $order->customerUserId,
+            )
+        );
+        return $order;
     }
 
     /**
@@ -175,11 +164,26 @@ final class Order
         return new self(
             id: $record->id,
             date: $record->date,
-            items: $record->items,
             customerUserId: $record->customerUserId,
+            items: $record->items,
             accepted: $record->accepted,
             finished: $record->finished,
             eventChannel: $eventChannel,
+        );
+    }
+
+    /**
+     * 永続化
+     */
+    public function toPersistenceRecord(): OrderRecord
+    {
+        return new OrderRecord(
+            id: $this->id,
+            date: $this->date,
+            items: $this->items,
+            customerUserId: $this->customerUserId,
+            accepted: $this->accepted,
+            finished: $this->finished,
         );
     }
 

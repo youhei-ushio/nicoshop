@@ -22,6 +22,6 @@ final class Interactor
     {
         $order = $this->orderRepository->findById($input->id);
         $order->done();
-        $order->save($this->orderRepository);
+        $this->orderRepository->save($order);
     }
 }

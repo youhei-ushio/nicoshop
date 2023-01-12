@@ -8,9 +8,9 @@ use App\Contexts\Sales\Domain\Entity\Order;
 
 interface OrderRepository
 {
-    public function save(OrderRecord $record): int;
+    public function save(Order $order): void;
 
-    public function findById(int $id): Order;
+    public function findById(string $id): Order;
 
     public function findUnacceptedOrder(): OrderPaginator;
 }

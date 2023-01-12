@@ -7,7 +7,7 @@ namespace App\Contexts\Sales\Application\UseCase\Order\Done;
 final class Input
 {
     private function __construct(
-        public readonly int $id,
+        public readonly string $id,
     )
     {
 
@@ -16,7 +16,7 @@ final class Input
     public static function fromArray(array $input): self
     {
         return new self(
-            id: intval($input['id']),
+            id: $input['id'],
         );
     }
 }

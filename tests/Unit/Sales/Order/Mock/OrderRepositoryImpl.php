@@ -16,7 +16,6 @@ use DateTimeImmutable;
 final class OrderRepositoryImpl implements OrderRepository
 {
     private array $records = [];
-    private int $id = 0;
 
     public function __construct(
         private readonly EventChannel $eventChannel,
@@ -25,25 +24,13 @@ final class OrderRepositoryImpl implements OrderRepository
 
     }
 
-    public function save(OrderRecord $record): int
+    public function save(Order $order): void
     {
-        if ($record->id === null) {
-            $id = ++$this->id;
-        } else {
-            $id = $record->id;
-        }
-        $this->records[$id] = new OrderRecord(
-            id: $id,
-            date: $record->date,
-            items: $record->items,
-            customerUserId: $record->customerUserId,
-            accepted: $record->accepted,
-            finished: $record->finished,
-        );
-        return $this->id;
+        $record = $order->toPersistenceRecord();
+        $this->records[$record->id] = $record;
     }
 
-    public function findById(int $id): Order
+    public function findById(string $id): Order
     {
         return Order::restore($this->records[$id], $this->eventChannel);
     }
@@ -56,25 +43,25 @@ final class OrderRepositoryImpl implements OrderRepository
         return $this->records;
     }
 
-    public function addTestRecord(bool $accepted = false, bool $finished = false): int
+    public function addTestRecord(bool $accepted = false, bool $finished = false): string
     {
-        return $this->save(new OrderRecord(
-            id: null,
+        $record = new OrderRecord(
+            id: uniqid(more_entropy: true),
             date: new DateTimeImmutable(),
             items: [
                 new Order\Item(
                     product: new Product(
                         id: 12345,
-                        name: 'TEST!!!!',
-                        unitPrice: 100,
+                        quantity: 1,
                     ),
-                    quantity: 1,
                 ),
             ],
             customerUserId: 1,
             accepted: $accepted,
             finished: $finished,
-        ));
+        );
+        $this->records[$record->id] = $record;
+        return $record->id;
     }
 
     public function findUnacceptedOrder(): OrderPaginator
