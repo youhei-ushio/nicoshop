@@ -6,16 +6,17 @@ namespace Tests\Unit\Sales\Order\Mock;
 
 use App\Contexts\Sales\Domain\Entity\Order;
 use App\Contexts\Sales\Domain\Persistence\EventChannel;
-use App\Contexts\Sales\Domain\Persistence\NotAcceptedOrderRepository;
+use App\Contexts\Sales\Domain\Persistence\OrderRepository;
 use App\Contexts\Sales\Domain\Persistence\OrderPaginator;
 use App\Contexts\Sales\Domain\Persistence\OrderRecord;
 use App\Contexts\Sales\Domain\Value\Product;
+use BadMethodCallException;
 use DateTimeImmutable;
 use Generator;
 use IteratorIterator;
 use Traversable;
 
-final class NotAcceptedOrderRepositoryImpl implements NotAcceptedOrderRepository
+final class NotAcceptedOrderRepositoryImpl implements OrderRepository
 {
     /** @var OrderRecord[] $orders */
     private readonly array $orders;
@@ -64,7 +65,17 @@ final class NotAcceptedOrderRepositoryImpl implements NotAcceptedOrderRepository
         } while ($currentPage <= $lastPage);
     }
 
-    public function find(): OrderPaginator
+    public function save(OrderRecord $record): int
+    {
+        throw new BadMethodCallException('Unused');
+    }
+
+    public function findById(int $id): Order
+    {
+        throw new BadMethodCallException('Unused');
+    }
+
+    public function findUnacceptedOrder(): OrderPaginator
     {
         return new class($this->paginate(), $this->eventChannel) extends IteratorIterator implements OrderPaginator
         {

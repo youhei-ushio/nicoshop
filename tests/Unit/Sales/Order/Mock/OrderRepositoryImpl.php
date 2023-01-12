@@ -6,9 +6,11 @@ namespace Tests\Unit\Sales\Order\Mock;
 
 use App\Contexts\Sales\Domain\Entity\Order;
 use App\Contexts\Sales\Domain\Persistence\EventChannel;
+use App\Contexts\Sales\Domain\Persistence\OrderPaginator;
 use App\Contexts\Sales\Domain\Persistence\OrderRecord;
 use App\Contexts\Sales\Domain\Persistence\OrderRepository;
 use App\Contexts\Sales\Domain\Value\Product;
+use BadMethodCallException;
 use DateTimeImmutable;
 
 final class OrderRepositoryImpl implements OrderRepository
@@ -73,5 +75,10 @@ final class OrderRepositoryImpl implements OrderRepository
             accepted: $accepted,
             finished: $finished,
         ));
+    }
+
+    public function findUnacceptedOrder(): OrderPaginator
+    {
+        throw new BadMethodCallException('Unused');
     }
 }

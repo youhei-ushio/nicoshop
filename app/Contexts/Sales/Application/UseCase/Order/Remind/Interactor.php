@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Contexts\Sales\Application\UseCase\Order\Remind;
 
-use App\Contexts\Sales\Domain\Persistence\NotAcceptedOrderRepository;
+use App\Contexts\Sales\Domain\Persistence\OrderRepository;
 
 /**
  * 未受付のリマインド
@@ -12,7 +12,7 @@ use App\Contexts\Sales\Domain\Persistence\NotAcceptedOrderRepository;
 final class Interactor
 {
     public function __construct(
-        private readonly NotAcceptedOrderRepository $repository,
+        private readonly OrderRepository $repository,
     )
     {
 
@@ -20,7 +20,7 @@ final class Interactor
 
     public function execute(): void
     {
-        foreach ($this->repository->find() as $order) {
+        foreach ($this->repository->findUnacceptedOrder() as $order) {
             $order->remind();
         }
     }

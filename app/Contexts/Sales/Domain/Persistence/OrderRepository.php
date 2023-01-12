@@ -11,4 +11,6 @@ interface OrderRepository
     public function save(OrderRecord $record): int;
 
     public function findById(int $id): Order;
+
+    public function findUnacceptedOrder(): OrderPaginator;
 }
