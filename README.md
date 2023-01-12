@@ -33,11 +33,11 @@ classDiagram
       -bool finished
       -EventChannel eventChannel
 
-      +Order create(string id, int customerUserId, array products, EventChannel eventChannel)
       +add(Product product)
       +accept()
       +remind()
       +done()
+      +Order create(string id, int customerUserId, array products, EventChannel eventChannel)
       +OrderRecord toPersistenceRecord()
       +Order restore(OrderRecord record, EventChannel eventChannel)
     }
@@ -66,7 +66,7 @@ classDiagram
     OrderRepository *-- Interactor
     OrderRecord <.. OrderRepository
     Input <.. Interactor
-    OrderItem *-- Input
+    Product *-- Input
     class Interactor{
       +execute(Input input)
     }
