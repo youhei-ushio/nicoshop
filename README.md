@@ -12,86 +12,66 @@ classDiagram
     Item *-- Order
     Product *-- Item
     Product <.. Order
-    OrderCreated <.. Order
+    EventChannel *.. Order
     OrderRecord <.. Order
     Item *-- OrderRecord
-    OrderRepository <.. Order
+    Order <.. OrderFactory
+    Order <.. OrderRepository
     class Product{
       +int id
-      +string name
+      +int quantity
     }
     class Item{
       +Product product
-      +int quantity
     }
     class Order{
-      -int id
+      -string id
       -DateTime date
       -Item[] items
       -int customerUserId
       -bool accepted
       -bool finished
+      -EventChannel eventChannel
 
-      +Order create(int customerUserId)$
-      +add(Product product, int quantity)
+      +Order create(string id, int customerUserId, array products, EventChannel eventChannel)
+      +add(Product product)
       +accept()
       +remind()
       +done()
-      +save(OrderRepository $repository)
-      +Order restore(OrderRecord record)
+      +OrderRecord toPersistenceRecord()
+      +Order restore(OrderRecord record, EventChannel eventChannel)
     }
-    class OrderCreated{
+    class EventChannel{
       <<interface>>
-      +notify()
+      +publish()
     }
     class OrderRecord{
-      +int id
+      +string id
       +DateTime date
       +Item[] items
       +int customerUserId
       +bool accepted
       +bool finished
     }
+    class OrderFactory {
+      +Order create(int customerUserId, array products)
+    }
     class OrderRepository{
       <<interface>>
-      +save(OrderRecord $record)
-      +OrderRecord findById(int id) 
+      +save(Order order)
+      +OrderRecord findById(string id) 
     }
 
+    OrderFactory *-- Interactor
     OrderRepository *-- Interactor
     OrderRecord <.. OrderRepository
-    ProductQuery *-- Interactor
     Input <.. Interactor
     OrderItem *-- Input
-    ProductPaginator <.. ProductQuery
-    Product <.. ProductPaginator
-    Iterator <|-- ProductPaginator
     class Interactor{
       +execute(Input input)
     }
     class Input{
-      +OrderItem[] items
+      +Product[] products
       +int customerUserId
-    }
-    class OrderItem{
-      +int productId
-      +int quantity
-    }
-    class ProductQuery{
-      <<interface>>
-      +ProductQuery filterByIds(int[] ids)
-      +ProductQuery paginate(int perPage, int currentPage)
-      +ProductPaginator execute()
-    }
-    class ProductPaginator{
-      <<interface>>
-      +Product current()
-      +int total()
-      +int perPage()
-      +int currentPage()
-      +Product getById()
-    }
-    class Iterator{
-      <<interface>>
     }
 ```
