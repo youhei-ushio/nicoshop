@@ -60,7 +60,7 @@ classDiagram
     class OrderRepository{
       <<interface>>
       +save(Order order)
-      +OrderRecord findById(string id) 
+      +Order findById(string id) 
     }
 
     OrderFactory *-- Interactor
