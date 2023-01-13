@@ -12,5 +12,5 @@ interface OrderRepository
 
     public function findById(string $id): Order;
 
-    public function findUnacceptedOrder(): OrderPaginator;
+    public function findUnacceptedOrder(): OrderIterator;
 }

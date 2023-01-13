@@ -7,7 +7,7 @@ namespace Tests\Unit\Sales\Order\Mock;
 use App\Contexts\Sales\Domain\Entity\Order;
 use App\Contexts\Sales\Domain\Persistence\EventChannel;
 use App\Contexts\Sales\Domain\Persistence\OrderRepository;
-use App\Contexts\Sales\Domain\Persistence\OrderPaginator;
+use App\Contexts\Sales\Domain\Persistence\OrderIterator;
 use App\Contexts\Sales\Domain\Persistence\OrderRecord;
 use App\Contexts\Sales\Domain\Value\Product;
 use BadMethodCallException;
@@ -73,9 +73,9 @@ final class NotAcceptedOrderRepositoryImpl implements OrderRepository
         throw new BadMethodCallException('Unused');
     }
 
-    public function findUnacceptedOrder(): OrderPaginator
+    public function findUnacceptedOrder(): OrderIterator
     {
-        return new class($this->paginate(), $this->eventChannel) extends IteratorIterator implements OrderPaginator
+        return new class($this->paginate(), $this->eventChannel) extends IteratorIterator implements OrderIterator
         {
             public function __construct(Traversable $iterator, private readonly EventChannel $eventChannel)
             {

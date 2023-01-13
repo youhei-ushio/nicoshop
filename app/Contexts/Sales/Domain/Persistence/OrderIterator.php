@@ -7,7 +7,7 @@ namespace App\Contexts\Sales\Domain\Persistence;
 use App\Contexts\Sales\Domain\Entity\Order;
 use Iterator;
 
-interface OrderPaginator extends Iterator
+interface OrderIterator extends Iterator
 {
     public function current(): Order;
 }
