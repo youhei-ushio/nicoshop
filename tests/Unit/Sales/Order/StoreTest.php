@@ -6,6 +6,7 @@ namespace Tests\Unit\Sales\Order;
 
 use App\Contexts\Sales\Application\UseCase\Order\Store\Input;
 use App\Contexts\Sales\Application\UseCase\Order\Store\Interactor;
+use App\Contexts\Sales\Domain\Entity\OrderFactory;
 use App\Contexts\Sales\Domain\Event\OrderCreated;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -32,7 +33,10 @@ final class StoreTest extends TestCase
             }
         };
         $eventChannel->subscribe(OrderCreated::class, $subscriber);
-        $orderFactory = new Mock\OrderFactoryImpl($eventChannel);
+        $orderFactory = new OrderFactory(
+            $eventChannel,
+            new Mock\IdFactoryImpl()
+        );
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
             $orderFactory,
@@ -80,7 +84,10 @@ final class StoreTest extends TestCase
 
         // 前準備
         $eventChannel = new Mock\EventChannelImpl();
-        $orderFactory = new Mock\OrderFactoryImpl($eventChannel);
+        $orderFactory = new OrderFactory(
+            $eventChannel,
+            new Mock\IdFactoryImpl()
+        );
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
             $orderFactory,
@@ -101,7 +108,10 @@ final class StoreTest extends TestCase
     {
         // 前準備
         $eventChannel = new Mock\EventChannelImpl();
-        $orderFactory = new Mock\OrderFactoryImpl($eventChannel);
+        $orderFactory = new OrderFactory(
+            $eventChannel,
+            new Mock\IdFactoryImpl()
+        );
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
             $orderFactory,
@@ -135,7 +145,10 @@ final class StoreTest extends TestCase
 
         // 前準備
         $eventChannel = new Mock\EventChannelImpl();
-        $orderFactory = new Mock\OrderFactoryImpl($eventChannel);
+        $orderFactory = new OrderFactory(
+            $eventChannel,
+            new Mock\IdFactoryImpl()
+        );
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
             $orderFactory,
@@ -161,7 +174,10 @@ final class StoreTest extends TestCase
     {
         // 前準備
         $eventChannel = new Mock\EventChannelImpl();
-        $orderFactory = new Mock\OrderFactoryImpl($eventChannel);
+        $orderFactory = new OrderFactory(
+            $eventChannel,
+            new Mock\IdFactoryImpl()
+        );
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
             $orderFactory,
@@ -197,7 +213,10 @@ final class StoreTest extends TestCase
 
         // 前準備
         $eventChannel = new Mock\EventChannelImpl();
-        $orderFactory = new Mock\OrderFactoryImpl($eventChannel);
+        $orderFactory = new OrderFactory(
+            $eventChannel,
+            new Mock\IdFactoryImpl()
+        );
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
             $orderFactory,
@@ -233,7 +252,10 @@ final class StoreTest extends TestCase
 
         // 前準備
         $eventChannel = new Mock\EventChannelImpl();
-        $orderFactory = new Mock\OrderFactoryImpl($eventChannel);
+        $orderFactory = new OrderFactory(
+            $eventChannel,
+            new Mock\IdFactoryImpl()
+        );
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
             $orderFactory,
