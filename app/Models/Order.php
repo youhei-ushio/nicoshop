@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Carbon|null $accepted_at
  * @property bool $finished
  * @property Carbon|null $finished_at
- * @property OrderItem[] $items
+ * @property Collection $items
  */
 final class Order extends Model
 {
@@ -37,6 +38,11 @@ final class Order extends Model
         'order_date',
         'accepted_at',
         'finished_at',
+    ];
+
+    protected $casts = [
+        'accepted' => 'boolean',
+        'finished' => 'boolean',
     ];
 
     public function items(): HasMany

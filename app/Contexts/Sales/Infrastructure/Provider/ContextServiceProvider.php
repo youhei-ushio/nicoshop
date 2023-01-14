@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Contexts\Sales\Infrastructure\Provider;
 
+use App\Contexts\Sales\Application\Persistence\OrderQuery;
 use App\Contexts\Sales\Application\Persistence\ProductQuery;
 use App\Contexts\Sales\Domain\Entity\IdFactory;
 use App\Contexts\Sales\Domain\Persistence\EventChannel;
 use App\Contexts\Sales\Domain\Persistence\OrderRepository;
 use App\Contexts\Sales\Infrastructure\Factory\IdFactoryImpl;
 use App\Contexts\Sales\Infrastructure\Persistence\EventChannelImpl;
+use App\Contexts\Sales\Infrastructure\Persistence\OrderQueryImpl;
 use App\Contexts\Sales\Infrastructure\Persistence\OrderRepositoryImpl;
 use App\Contexts\Sales\Infrastructure\Persistence\ProductQueryImpl;
 use Illuminate\Support\ServiceProvider;
@@ -45,6 +47,10 @@ final class ContextServiceProvider extends ServiceProvider
         $this->app->bind(
             abstract: OrderRepository::class,
             concrete: OrderRepositoryImpl::class,
+        );
+        $this->app->bind(
+            abstract: OrderQuery::class,
+            concrete: OrderQueryImpl::class,
         );
     }
 }

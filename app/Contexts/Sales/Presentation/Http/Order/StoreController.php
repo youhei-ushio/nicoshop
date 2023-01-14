@@ -24,7 +24,7 @@ final class StoreController extends Controller
         $input = $request->validated();
         try {
             $interactor->execute(Input::fromArray($input));
-            return redirect(route('sales.orders.create'))
+            return redirect(route('sales.orders.index'))
                 ->with('succeeded', 'Order created.');
         } catch (Throwable $exception) {
             return redirect(route('sales.orders.create'))

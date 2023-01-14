@@ -9,6 +9,8 @@ use Illuminate\Support\MessageBag;
  */
 ?>
 
+<h1>新規注文</h1>
+
 @if (session()->has('succeeded'))
     <div class="alert alert-success">{{ session('succeeded') }}</div>
 @endif
@@ -45,3 +47,5 @@ use Illuminate\Support\MessageBag;
 
     <button>登録</button>
 </form>
+
+<a href="{{ route('sales.orders.index') }}">注文一覧</a>

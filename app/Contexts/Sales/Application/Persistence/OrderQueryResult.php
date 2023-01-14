@@ -13,7 +13,7 @@ final class OrderQueryResult
      * @param Order\Item[] $items
      */
     public function __construct(
-        public readonly int $id,
+        public readonly string $id,
         public readonly DateTimeImmutable $date,
         public readonly array $items,
         public readonly int $customerUserId,
