@@ -12,6 +12,4 @@ use App\Contexts\Sales\Domain\Event\OrderNotYetAccepted;
 interface EventChannel
 {
     public function publish(OrderCreated | OrderAccepted | OrderNotYetAccepted | OrderFinished $event): void;
-
-    public function subscribe(string $eventName, callable $subscriber): void;
 }

@@ -21,6 +21,11 @@ final class Input
 
     public static function fromArray(array $input): self
     {
+        foreach ($input['items'] as $index => $item) {
+            if (empty($item['product_id']) || empty($item['quantity'])) {
+                unset($input['items'][$index]);
+            }
+        }
         return new self(
             products: array_map(function (array $itemInput) {
                 return new Product(
@@ -28,7 +33,7 @@ final class Input
                     intval($itemInput['quantity']),
                 );
             }, $input['items']),
-            customerUserId: $input['user_id'],
+            customerUserId: intval($input['user_id']),
         );
     }
 }
