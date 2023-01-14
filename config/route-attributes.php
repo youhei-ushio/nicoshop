@@ -20,6 +20,9 @@ return [
            'middleware' => 'api',
         ],
         */
+        app_path('Contexts/Sales/Presentation/Http') => [
+            'middleware' => 'web',
+        ],
     ],
 
     /**
