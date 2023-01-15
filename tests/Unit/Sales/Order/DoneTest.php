@@ -6,6 +6,7 @@ namespace Tests\Unit\Sales\Order;
 
 use App\Contexts\Sales\Application\UseCase\Order\Done\Input;
 use App\Contexts\Sales\Application\UseCase\Order\Done\Interactor;
+use App\Contexts\Sales\Domain\Event\OrderFinished;
 use BadMethodCallException;
 use PHPUnit\Framework\TestCase;
 
@@ -18,6 +19,19 @@ final class DoneTest extends TestCase
     {
         // 前準備
         $eventChannel = new Mock\EventChannelImpl();
+        $subscriber = new class()
+        {
+            public function __construct(public bool $finished = false)
+            {
+
+            }
+
+            public function __invoke(OrderFinished $event): void
+            {
+                $this->finished = true;
+            }
+        };
+        $eventChannel->subscribe(OrderFinished::class, $subscriber);
         $repository = new Mock\OrderRepositoryImpl($eventChannel);
         $orderId = $repository->addTestRecord(accepted: true);
 
@@ -36,6 +50,7 @@ final class DoneTest extends TestCase
         // 検証
         $finishedOrder = current($repository->toArray());
         $this->assertTrue($finishedOrder->finished);
+        $this->assertTrue($subscriber->finished);
     }
 
     /**

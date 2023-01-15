@@ -6,6 +6,7 @@ namespace Tests\Unit\Sales\Order;
 
 use App\Contexts\Sales\Application\UseCase\Order\Accept\Input;
 use App\Contexts\Sales\Application\UseCase\Order\Accept\Interactor;
+use App\Contexts\Sales\Domain\Event\OrderAccepted;
 use BadMethodCallException;
 use PHPUnit\Framework\TestCase;
 
@@ -18,6 +19,19 @@ final class AcceptTest extends TestCase
     {
         // 前準備
         $eventChannel = new Mock\EventChannelImpl();
+        $subscriber = new class()
+        {
+            public function __construct(public bool $accepted = false)
+            {
+
+            }
+
+            public function __invoke(OrderAccepted $event): void
+            {
+                $this->accepted = true;
+            }
+        };
+        $eventChannel->subscribe(OrderAccepted::class, $subscriber);
         $repository = new Mock\OrderRepositoryImpl($eventChannel);
         $orderId = $repository->addTestRecord();
 
@@ -36,6 +50,7 @@ final class AcceptTest extends TestCase
         // 検証
         $acceptedOrder = current($repository->toArray());
         $this->assertTrue($acceptedOrder->accepted);
+        $this->assertTrue($subscriber->accepted);
     }
 
     /**
