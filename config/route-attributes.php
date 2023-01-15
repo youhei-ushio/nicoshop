@@ -21,7 +21,7 @@ return [
         ],
         */
         app_path('Contexts/Sales/Presentation/Http') => [
-            'middleware' => 'web',
+            'middleware' => ['web', 'auth'],
         ],
     ],
 
