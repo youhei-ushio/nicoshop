@@ -4,21 +4,28 @@ declare(strict_types=1);
 
 namespace App\Contexts\Sales\Infrastructure\Provider;
 
+use App\Contexts\Sales\Application\Persistence\CartItemQuery;
 use App\Contexts\Sales\Application\Persistence\OrderQuery;
 use App\Contexts\Sales\Application\Persistence\ProductQuery;
 use App\Contexts\Sales\Domain\Entity\IdFactory;
 use App\Contexts\Sales\Domain\Event\OrderCreated;
+use App\Contexts\Sales\Domain\Persistence\CartRepository;
 use App\Contexts\Sales\Domain\Persistence\EventChannel;
 use App\Contexts\Sales\Domain\Persistence\OrderRepository;
 use App\Contexts\Sales\Infrastructure\Factory\IdFactoryImpl;
 use App\Contexts\Sales\Infrastructure\Notification\OrderCreatedNotification;
+use App\Contexts\Sales\Infrastructure\Persistence\CartItemQueryImpl;
+use App\Contexts\Sales\Infrastructure\Persistence\CartRepositoryImpl;
 use App\Contexts\Sales\Infrastructure\Persistence\EventChannelImpl;
 use App\Contexts\Sales\Infrastructure\Persistence\OrderQueryImpl;
 use App\Contexts\Sales\Infrastructure\Persistence\OrderRepositoryImpl;
 use App\Contexts\Sales\Infrastructure\Persistence\ProductQueryImpl;
+use App\Contexts\Sales\Presentation\Http\Components\CartIcon;
+use App\Contexts\Sales\Presentation\Http\Components\Products;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Livewire\Livewire;
 
 final class ContextServiceProvider extends ServiceProvider
 {
@@ -36,6 +43,9 @@ final class ContextServiceProvider extends ServiceProvider
             OrderCreated::class,
             [OrderCreatedNotification::class, 'handle']
         );
+
+        Livewire::component('cart-icon', CartIcon::class);
+        Livewire::component('products', Products::class);
     }
 
     public function register(): void
@@ -59,6 +69,14 @@ final class ContextServiceProvider extends ServiceProvider
         $this->app->bind(
             abstract: OrderQuery::class,
             concrete: OrderQueryImpl::class,
+        );
+        $this->app->bind(
+            abstract: CartItemQuery::class,
+            concrete: CartItemQueryImpl::class,
+        );
+        $this->app->bind(
+            abstract: CartRepository::class,
+            concrete: CartRepositoryImpl::class,
         );
     }
 }

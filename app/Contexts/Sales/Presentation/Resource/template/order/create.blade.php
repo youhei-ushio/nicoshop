@@ -47,5 +47,9 @@ use Illuminate\Support\MessageBag;
 
     <button>登録</button>
 </form>
-
-<a href="{{ route('sales.orders.index') }}">注文一覧</a>
+<div>
+    <a href="{{ route('sales.orders.index') }}">注文一覧</a>
+</div>
+<div>
+    <a href="{{ route('sales.products.index') }}">商品一覧</a>
+</div>
