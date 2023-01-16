@@ -25,7 +25,7 @@ final class IndexController extends Controller
             intval($input['limit'] ?? 100),
             intval($input['page'] ?? 1),
         ));
-        return view('sales::order/index')
+        return view('sales::page/order/index')
             ->with('orders', $orders);
     }
 }

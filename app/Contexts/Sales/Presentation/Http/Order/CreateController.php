@@ -15,6 +15,6 @@ final class CreateController extends Controller
     #[Get('/sales/orders/create', 'sales.orders.create')]
     public function __invoke(): Factory|View|Application
     {
-        return view('sales::order/create');
+        return view('sales::page/order/create');
     }
 }
