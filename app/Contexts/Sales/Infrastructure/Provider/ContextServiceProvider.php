@@ -20,8 +20,9 @@ use App\Contexts\Sales\Infrastructure\Persistence\EventChannelImpl;
 use App\Contexts\Sales\Infrastructure\Persistence\OrderQueryImpl;
 use App\Contexts\Sales\Infrastructure\Persistence\OrderRepositoryImpl;
 use App\Contexts\Sales\Infrastructure\Persistence\ProductQueryImpl;
-use App\Contexts\Sales\Presentation\Http\Components\CartIcon;
-use App\Contexts\Sales\Presentation\Http\Components\Products;
+use App\Contexts\Sales\Presentation\Http\Component\CartItems;
+use App\Contexts\Sales\Presentation\Http\Component\CartIcon;
+use App\Contexts\Sales\Presentation\Http\Component\Products;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -46,6 +47,7 @@ final class ContextServiceProvider extends ServiceProvider
 
         Livewire::component('cart-icon', CartIcon::class);
         Livewire::component('products', Products::class);
+        Livewire::component('cart', CartItems::class);
     }
 
     public function register(): void

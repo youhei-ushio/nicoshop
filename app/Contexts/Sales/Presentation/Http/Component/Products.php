@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Contexts\Sales\Presentation\Http\Components;
+namespace App\Contexts\Sales\Presentation\Http\Component;
 
 use App\Contexts\Sales\Application\UseCase\Cart\Add\Input;
 use App\Contexts\Sales\Application\UseCase\Cart\Add\Interactor;
@@ -26,6 +26,7 @@ final class Products extends Component
 
     public function render(): Factory|View|Application
     {
+        // Eloquent直呼び出しパターン
         return view('sales::component.products')
             ->with('products', Models\Product::query()->paginate(20));
     }

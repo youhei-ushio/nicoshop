@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Contexts\Sales\Presentation\Http\Product;
+namespace App\Contexts\Sales\Presentation\Http\Controller\Cart;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-final class IndexRequest extends FormRequest
+final class DetailRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -16,11 +16,6 @@ final class IndexRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'limit' => [
-                'nullable',
-                'integer',
-                'min:1',
-            ],
             'page' => [
                 'nullable',
                 'integer',

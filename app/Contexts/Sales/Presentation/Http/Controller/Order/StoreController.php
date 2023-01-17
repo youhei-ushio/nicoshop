@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Contexts\Sales\Presentation\Http\Order;
+namespace App\Contexts\Sales\Presentation\Http\Controller\Order;
 
 use App\Contexts\Sales\Application\UseCase\Order\Store\Input;
 use App\Contexts\Sales\Application\UseCase\Order\Store\Interactor;

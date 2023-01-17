@@ -7,7 +7,7 @@ declare(strict_types=1);
     <x-slot name="header">
         <div class="relative py-3">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('商品一覧') }}
+                {{ __('カート') }}
             </h2>
             <livewire:cart-icon />
         </div>
@@ -17,7 +17,7 @@ declare(strict_types=1);
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <livewire:products />
+                    <livewire:cart />
                 </div>
             </div>
         </div>

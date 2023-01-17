@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Contexts\Sales\Presentation\Http\Components;
+namespace App\Contexts\Sales\Presentation\Http\Component;
 
 use App\Models;
 use Illuminate\Contracts\Foundation\Application;
@@ -30,6 +30,7 @@ final class CartIcon extends Component
 
     public function updateCount(): void
     {
+        // Eloquent直呼び出しパターン
         $this->itemCount = Models\Cart::query()
             ->join('cart_items', 'cart_items.cart_id', '=', 'carts.id')
             ->where('customer_user_id', auth()->id())

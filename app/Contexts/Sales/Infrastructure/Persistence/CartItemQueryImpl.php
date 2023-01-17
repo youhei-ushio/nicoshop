@@ -4,37 +4,55 @@ declare(strict_types=1);
 
 namespace App\Contexts\Sales\Infrastructure\Persistence;
 
-use App\Contexts\Sales\Application\Persistence\CartItemIterator;
+use App\Contexts\Sales\Application\Persistence\CartItemPaginator;
 use App\Contexts\Sales\Application\Persistence\CartItemQuery;
 use App\Contexts\Sales\Application\Persistence\CartItemQueryResult;
-use App\Contexts\Sales\Domain\Value\Product;
 use App\Models;
-use ArrayIterator;
 use Illuminate\Database\Eloquent\Collection;
 use IteratorIterator;
-use LogicException;
 use Traversable;
 
 final class CartItemQueryImpl implements CartItemQuery
 {
-    public function get(int $customerUserId): CartItemIterator
+    private int $perPage = 20;
+    private int $currentPage = 1;
+
+    public function paginate(int $currentPage): CartItemQuery
     {
-        /** @var Models\Cart $row */
-        $row = Models\Cart::query()
-            ->with([
-                'items',
-            ])
+        $this->currentPage = $currentPage;
+        return $this;
+    }
+
+    public function get(int $customerUserId): CartItemPaginator
+    {
+        /** @var Models\Cart $cartRow */
+        $cartRow = Models\Cart::query()
             ->where('customer_user_id', $customerUserId)
             ->first();
 
+        if ($cartRow === null) {
+            $items = new Collection();
+        } else {
+            $items = Models\CartItem::query()
+                ->with([
+                    'product',
+                ])
+                ->where('cart_id', $cartRow->id)
+                ->paginate(perPage: $this->perPage, page: $this->currentPage);
+        }
+
         return new class(
-            $row?->items ?? new Collection(),
-            $row?->items?->count() ?? 0,
-        ) extends IteratorIterator implements CartItemIterator
+            $items,
+            $items->total(),
+            $this->perPage,
+            $this->currentPage,
+        ) extends IteratorIterator implements CartItemPaginator
         {
             public function __construct(
                 Traversable $iterator,
-                private readonly int $count,
+                private readonly int $total,
+                private readonly int $perPage,
+                private readonly int $currentPage,
             )
             {
                 parent::__construct($iterator);
@@ -45,21 +63,25 @@ final class CartItemQueryImpl implements CartItemQuery
                 /** @var Models\CartItem $row */
                 $row = parent::current();
                 return new CartItemQueryResult(
-                    new Product(
-                        id: $row->product_id,
-                        quantity: $row->quantity,
-                    )
+                    productId: $row->product_id,
+                    productName: $row->product->name,
+                    quantity: $row->quantity,
                 );
             }
 
-            public function count(): int
+            public function total(): int
             {
-                return $this->count;
+                return $this->total;
             }
 
-            public function isEmpty(): bool
+            public function perPage(): int
             {
-                return $this->count === 0;
+                return $this->perPage;
+            }
+
+            public function currentPage(): int
+            {
+                return $this->currentPage;
             }
         };
     }
