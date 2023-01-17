@@ -9,6 +9,7 @@ use App\Contexts\Sales\Application\Persistence\CartItemQuery;
 use App\Contexts\Sales\Application\Persistence\CartItemQueryResult;
 use App\Models;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use IteratorIterator;
 use Traversable;
 
@@ -31,7 +32,7 @@ final class CartItemQueryImpl implements CartItemQuery
             ->first();
 
         if ($cartRow === null) {
-            $items = new Collection();
+            $items = new LengthAwarePaginator([], 0, 100);
         } else {
             $items = Models\CartItem::query()
                 ->with([
