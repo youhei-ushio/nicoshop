@@ -12,6 +12,9 @@ use Illuminate\Contracts\Pagination\Paginator;
  */
 ?>
 <div>
+    <x-secondary-button class="ml-3 mb-3" wire:click="clear()" onclick="confirm('{{ __('Are you sure you would like to remove these item from the shopping cart') }}') || event.stopImmediatePropagation()">
+        {{ __('Clear') }}
+    </x-secondary-button>
     <ul>
         @foreach($items as $item)
             <li>

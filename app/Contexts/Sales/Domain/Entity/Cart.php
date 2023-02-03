@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Contexts\Sales\Domain\Entity;
 
 use App\Contexts\Sales\Domain\Event\CartItemAdded;
+use App\Contexts\Sales\Domain\Event\CartItemCleared;
 use App\Contexts\Sales\Domain\Persistence\CartRecord;
 use App\Contexts\Sales\Domain\Persistence\EventChannel;
 use App\Contexts\Sales\Domain\Value\Product;
@@ -48,6 +49,17 @@ final class Cart
             new CartItemAdded(
                 customerUserId: $this->customerUserId,
                 items: $this->items,
+            )
+        );
+    }
+
+    public function clear(): void
+    {
+        $this->items = [];
+
+        $this->eventChannel->publish(
+            new CartItemCleared(
+                customerUserId: $this->customerUserId,
             )
         );
     }

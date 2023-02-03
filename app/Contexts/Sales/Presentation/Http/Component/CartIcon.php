@@ -14,9 +14,10 @@ final class CartIcon extends Component
 {
     protected $listeners = [
         'itemAdded' => 'updateCount',
+        'itemCleared' => 'updateCount',
     ];
 
-    public int $itemCount = 0;
+    private int $itemCount = 0;
 
     public function mount(): void
     {
@@ -25,7 +26,8 @@ final class CartIcon extends Component
 
     public function render(): Factory|View|Application
     {
-        return view('sales::component.cart-icon');
+        return view('sales::component.cart-icon')
+            ->with('itemCount', $this->itemCount);
     }
 
     public function updateCount(): void

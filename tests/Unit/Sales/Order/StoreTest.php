@@ -10,6 +10,7 @@ use App\Contexts\Sales\Domain\Entity\OrderFactory;
 use App\Contexts\Sales\Domain\Event\OrderCreated;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use Tests\Unit\Mock\EventChannelImpl;
 
 final class StoreTest extends TestCase
 {
@@ -19,7 +20,7 @@ final class StoreTest extends TestCase
     public function testCanOrder(): void
     {
         // 前準備
-        $eventChannel = new Mock\EventChannelImpl();
+        $eventChannel = new EventChannelImpl();
         $subscriber = new class()
         {
             public function __construct(public bool $created = false)
@@ -35,7 +36,7 @@ final class StoreTest extends TestCase
         $eventChannel->subscribe(OrderCreated::class, $subscriber);
         $orderFactory = new OrderFactory(
             $eventChannel,
-            new Mock\IdFactoryImpl()
+            new \Tests\Unit\Mock\IdFactoryImpl()
         );
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
@@ -83,10 +84,10 @@ final class StoreTest extends TestCase
         $this->expectErrorMessage('Cannot order without products');
 
         // 前準備
-        $eventChannel = new Mock\EventChannelImpl();
+        $eventChannel = new EventChannelImpl();
         $orderFactory = new OrderFactory(
             $eventChannel,
-            new Mock\IdFactoryImpl()
+            new \Tests\Unit\Mock\IdFactoryImpl()
         );
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
@@ -107,10 +108,10 @@ final class StoreTest extends TestCase
     public function testCanOrderWithMaxQuantityItem(): void
     {
         // 前準備
-        $eventChannel = new Mock\EventChannelImpl();
+        $eventChannel = new EventChannelImpl();
         $orderFactory = new OrderFactory(
             $eventChannel,
-            new Mock\IdFactoryImpl()
+            new \Tests\Unit\Mock\IdFactoryImpl()
         );
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
@@ -144,10 +145,10 @@ final class StoreTest extends TestCase
         $this->expectErrorMessage('The item quantity must not have more than 1000000.');
 
         // 前準備
-        $eventChannel = new Mock\EventChannelImpl();
+        $eventChannel = new EventChannelImpl();
         $orderFactory = new OrderFactory(
             $eventChannel,
-            new Mock\IdFactoryImpl()
+            new \Tests\Unit\Mock\IdFactoryImpl()
         );
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
@@ -173,10 +174,10 @@ final class StoreTest extends TestCase
     public function testCanOrderWithMaxItems(): void
     {
         // 前準備
-        $eventChannel = new Mock\EventChannelImpl();
+        $eventChannel = new EventChannelImpl();
         $orderFactory = new OrderFactory(
             $eventChannel,
-            new Mock\IdFactoryImpl()
+            new \Tests\Unit\Mock\IdFactoryImpl()
         );
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
@@ -212,10 +213,10 @@ final class StoreTest extends TestCase
         $this->expectErrorMessage('The order must not have more than 100 items.');
 
         // 前準備
-        $eventChannel = new Mock\EventChannelImpl();
+        $eventChannel = new EventChannelImpl();
         $orderFactory = new OrderFactory(
             $eventChannel,
-            new Mock\IdFactoryImpl()
+            new \Tests\Unit\Mock\IdFactoryImpl()
         );
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
@@ -251,10 +252,10 @@ final class StoreTest extends TestCase
         $this->expectErrorMessage('The product has already been taken.');
 
         // 前準備
-        $eventChannel = new Mock\EventChannelImpl();
+        $eventChannel = new EventChannelImpl();
         $orderFactory = new OrderFactory(
             $eventChannel,
-            new Mock\IdFactoryImpl()
+            new \Tests\Unit\Mock\IdFactoryImpl()
         );
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(

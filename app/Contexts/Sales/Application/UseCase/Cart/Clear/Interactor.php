@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Contexts\Sales\Application\UseCase\Cart\Add;
+namespace App\Contexts\Sales\Application\UseCase\Cart\Clear;
 
 use App\Contexts\Sales\Domain\Persistence\CartRepository;
 
 /**
- * カート商品追加
+ * カート内商品削除
  */
 final class Interactor
 {
@@ -21,7 +21,7 @@ final class Interactor
     public function execute(Input $input): void
     {
         $cart = $this->cartRepository->findByCustomerId($input->customerUserId);
-        $cart->add($input->product);
+        $cart->clear();
         $this->cartRepository->save($cart);
     }
 }

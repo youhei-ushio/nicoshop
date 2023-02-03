@@ -6,7 +6,7 @@ namespace App\Contexts\Sales\Application\Persistence;
 
 interface OrderQuery
 {
-    public function onlyUnfinished(): self;
+    public function withoutFinished(): self;
 
     public function paginate(int $perPage, int $currentPage): self;
 

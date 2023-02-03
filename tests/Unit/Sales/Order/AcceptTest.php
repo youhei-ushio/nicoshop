@@ -9,6 +9,7 @@ use App\Contexts\Sales\Application\UseCase\Order\Accept\Interactor;
 use App\Contexts\Sales\Domain\Event\OrderAccepted;
 use BadMethodCallException;
 use PHPUnit\Framework\TestCase;
+use Tests\Unit\Mock\EventChannelImpl;
 
 final class AcceptTest extends TestCase
 {
@@ -18,7 +19,7 @@ final class AcceptTest extends TestCase
     public function testCanAccept(): void
     {
         // 前準備
-        $eventChannel = new Mock\EventChannelImpl();
+        $eventChannel = new EventChannelImpl();
         $subscriber = new class()
         {
             public function __construct(public bool $accepted = false)
@@ -63,7 +64,7 @@ final class AcceptTest extends TestCase
         $this->expectErrorMessage('The order has already been accepted.');
 
         // 前準備
-        $eventChannel = new Mock\EventChannelImpl();
+        $eventChannel = new EventChannelImpl();
         $repository = new Mock\OrderRepositoryImpl($eventChannel);
         $orderId = $repository->addTestRecord(accepted: true);
 

@@ -9,6 +9,7 @@ use App\Contexts\Sales\Application\UseCase\Order\Done\Interactor;
 use App\Contexts\Sales\Domain\Event\OrderFinished;
 use BadMethodCallException;
 use PHPUnit\Framework\TestCase;
+use Tests\Unit\Mock\EventChannelImpl;
 
 final class DoneTest extends TestCase
 {
@@ -18,7 +19,7 @@ final class DoneTest extends TestCase
     public function testCanDone(): void
     {
         // 前準備
-        $eventChannel = new Mock\EventChannelImpl();
+        $eventChannel = new EventChannelImpl();
         $subscriber = new class()
         {
             public function __construct(public bool $finished = false)
@@ -63,7 +64,7 @@ final class DoneTest extends TestCase
         $this->expectErrorMessage('The order not yet accepted.');
 
         // 前準備
-        $eventChannel = new Mock\EventChannelImpl();
+        $eventChannel = new EventChannelImpl();
         $repository = new Mock\OrderRepositoryImpl($eventChannel);
         $orderId = $repository->addTestRecord();
 
@@ -86,7 +87,7 @@ final class DoneTest extends TestCase
         $this->expectErrorMessage('The order has already done.');
 
         // 前準備
-        $eventChannel = new Mock\EventChannelImpl();
+        $eventChannel = new EventChannelImpl();
         $repository = new Mock\OrderRepositoryImpl($eventChannel);
         $orderId = $repository->addTestRecord(accepted: true, finished: true);
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Sales\Order\Mock;
+namespace Tests\Unit\Mock;
 
 use App\Contexts\Sales\Domain\Entity\IdFactory;
 

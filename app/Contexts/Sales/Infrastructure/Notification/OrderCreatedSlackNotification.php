@@ -7,7 +7,7 @@ namespace App\Contexts\Sales\Infrastructure\Notification;
 use App\Contexts\Sales\Domain\Event\OrderCreated;
 use Spatie\SlackAlerts\Facades\SlackAlert;
 
-final class OrderCreatedNotification
+final class OrderCreatedSlackNotification
 {
     public function handle(OrderCreated $event): void
     {

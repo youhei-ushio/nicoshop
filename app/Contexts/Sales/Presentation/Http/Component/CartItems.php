@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Contexts\Sales\Presentation\Http\Component;
 
-use App\Contexts\Sales\Application\UseCase\Cart\Detail\Input;
-use App\Contexts\Sales\Application\UseCase\Cart\Detail\Interactor;
+use App\Contexts\Sales\Application\UseCase;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
+use InvalidArgumentException;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Usernotnull\Toast\Concerns\WireToast;
@@ -26,8 +26,8 @@ final class CartItems extends Component
     public function render(): Factory|View|Application
     {
         // UseCase呼び出しパターン
-        $interactor = app()->make(Interactor::class);
-        $items = $interactor->execute(new Input(
+        $interactor = app()->make(UseCase\Cart\Detail\Interactor::class);
+        $items = $interactor->execute(new UseCase\Cart\Detail\Input(
             auth()->id(),
             $this->page,
         ));
@@ -40,5 +40,20 @@ final class CartItems extends Component
         );
         return view('sales::component.cart-items')
             ->with('items', $paginator);
+    }
+
+    public function clear(UseCase\Cart\Clear\Interactor $interactor): void
+    {
+        try {
+            $interactor->execute(
+                new UseCase\Cart\Clear\Input(
+                    auth()->id(),
+                )
+            );
+            $this->emit('itemCleared');
+            toast()->success('Cart item cleared!')->push();
+        } catch (InvalidArgumentException $exception) {
+            toast()->danger($exception->getMessage())->push();
+        }
     }
 }

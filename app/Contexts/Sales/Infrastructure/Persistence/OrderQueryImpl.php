@@ -18,11 +18,11 @@ final class OrderQueryImpl implements OrderQuery
 {
     private int $perPage = 1000;
     private int $currentPage = 1;
-    private bool $onlyUnfinished = false;
+    private bool $withoutFinished = false;
 
-    public function onlyUnfinished(): OrderQuery
+    public function withoutFinished(): OrderQuery
     {
-        $this->onlyUnfinished = true;
+        $this->withoutFinished = true;
         return $this;
     }
 
@@ -36,7 +36,7 @@ final class OrderQueryImpl implements OrderQuery
     public function get(): OrderPaginator
     {
         $paginator = Models\Order::query()
-            ->when($this->onlyUnfinished, function (Builder $builder) {
+            ->when($this->withoutFinished, function (Builder $builder) {
                 $builder->where('finished', false);
             })
             ->paginate(perPage: $this->perPage, page: $this->currentPage);

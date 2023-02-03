@@ -7,13 +7,14 @@ namespace Tests\Unit\Sales\Order;
 use App\Contexts\Sales\Application\UseCase\Order\Remind\Interactor;
 use App\Contexts\Sales\Domain\Event\OrderNotYetAccepted;
 use PHPUnit\Framework\TestCase;
+use Tests\Unit\Mock\EventChannelImpl;
 
 final class RemindTest extends TestCase
 {
     public function testCanRemind(): void
     {
         // 前準備
-        $eventChannel = new Mock\EventChannelImpl();
+        $eventChannel = new EventChannelImpl();
         $repository = new Mock\NotAcceptedOrderRepositoryImpl($eventChannel);
         $subscriber = new class()
         {
