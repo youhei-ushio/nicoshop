@@ -22,6 +22,7 @@ final class Order
 {
     /**
      * @param Order\Item[] $items
+     * @see OrderFactory
      */
     private function __construct(
         private readonly string $id,
@@ -122,7 +123,7 @@ final class Order
      * @param Product[] $products
      * @see OrderFactory
      */
-    public static function create(
+    private static function create(
         string $id,
         int $customerUserId,
         array $products,
@@ -159,7 +160,7 @@ final class Order
     /**
      * 永続化データの復元
      */
-    public static function restore(OrderRecord $record, EventChannel $eventChannel): self
+    private static function restore(OrderRecord $record, EventChannel $eventChannel): self
     {
         return new self(
             id: $record->id,
@@ -175,7 +176,7 @@ final class Order
     /**
      * 永続化
      */
-    public function toPersistenceRecord(): OrderRecord
+    private function toPersistenceRecord(): OrderRecord
     {
         return new OrderRecord(
             id: $this->id,

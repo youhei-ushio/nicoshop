@@ -6,6 +6,7 @@ namespace App\Contexts\Sales\Domain\Entity;
 
 use App\Contexts\Sales\Domain\Persistence\EventChannel;
 use App\Contexts\Sales\Domain\Value\Product;
+use Closure;
 
 final class OrderFactory
 {
@@ -25,11 +26,15 @@ final class OrderFactory
         array $products,
     ): Order
     {
-        return Order::create(
-            $this->idFactory->create(),
-            $customerUserId,
-            $products,
-            $this->eventChannel,
-        );
+        $id = $this->idFactory->create();
+        $eventChannel = $this->eventChannel;
+        return Closure::bind(function() use ($id, $customerUserId, $products, $eventChannel) {
+            return Order::create(
+                $id,
+                $customerUserId,
+                $products,
+                $eventChannel,
+            );
+        }, null, Order::class)->__invoke();
     }
 }

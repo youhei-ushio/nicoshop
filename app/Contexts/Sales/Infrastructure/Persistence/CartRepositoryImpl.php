@@ -10,6 +10,7 @@ use App\Contexts\Sales\Domain\Persistence\CartRepository;
 use App\Contexts\Sales\Domain\Persistence\EventChannel;
 use App\Contexts\Sales\Domain\Value\Product;
 use App\Models;
+use Closure;
 use Illuminate\Support\Facades\DB;
 
 final class CartRepositoryImpl implements CartRepository
@@ -26,7 +27,9 @@ final class CartRepositoryImpl implements CartRepository
      */
     public function save(Cart $cart): void
     {
-        $record = $cart->toPersistenceRecord();
+        $record =  Closure::bind(function() use ($cart) {
+            return $cart->toPersistenceRecord();
+        }, null, Cart::class)->__invoke();
         DB::transaction(function () use ($record) {
             /** @var Models\Cart $cartRow */
             $cartRow = Models\Cart::query()
@@ -71,6 +74,9 @@ final class CartRepositoryImpl implements CartRepository
                 );
             })?->toArray() ?? [],
         );
-        return Cart::restore($record, $this->eventChannel);
+        $eventChannel = $this->eventChannel;
+        return Closure::bind(function() use ($record, $eventChannel) {
+            return Cart::restore($record, $eventChannel);
+        }, null, Cart::class)->__invoke();
     }
 }

@@ -11,6 +11,7 @@ use App\Contexts\Sales\Domain\Persistence\OrderRecord;
 use App\Contexts\Sales\Domain\Persistence\OrderRepository;
 use App\Contexts\Sales\Domain\Value\Product;
 use BadMethodCallException;
+use Closure;
 use DateTimeImmutable;
 
 final class OrderRepositoryImpl implements OrderRepository
@@ -26,13 +27,19 @@ final class OrderRepositoryImpl implements OrderRepository
 
     public function save(Order $order): void
     {
-        $record = $order->toPersistenceRecord();
+        $record = Closure::bind(function() use ($order) {
+            return $order->toPersistenceRecord();
+        }, null, Order::class)->__invoke();
         $this->records[$record->id] = $record;
     }
 
     public function findById(string $id): Order
     {
-        return Order::restore($this->records[$id], $this->eventChannel);
+        $record = $this->records[$id];
+        $eventChannel = $this->eventChannel;
+        return Closure::bind(function() use ($record, $eventChannel) {
+            return Order::restore($record, $eventChannel);
+        }, null, Order::class)->__invoke();
     }
 
     /**

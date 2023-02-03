@@ -11,6 +11,7 @@ use App\Contexts\Sales\Domain\Persistence\OrderIterator;
 use App\Contexts\Sales\Domain\Persistence\OrderRecord;
 use App\Contexts\Sales\Domain\Value\Product;
 use BadMethodCallException;
+use Closure;
 use DateTimeImmutable;
 use Generator;
 use IteratorIterator;
@@ -84,7 +85,11 @@ final class NotAcceptedOrderRepositoryImpl implements OrderRepository
 
             public function current(): Order
             {
-                return Order::restore(parent::current(), $this->eventChannel);
+                $record = parent::current();
+                $eventChannel = $this->eventChannel;
+                return Closure::bind(function() use ($record, $eventChannel) {
+                    return Order::restore($record, $eventChannel);
+                }, null, Order::class)->__invoke();
             }
         };
     }

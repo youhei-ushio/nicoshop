@@ -67,7 +67,7 @@ final class Cart
     /**
      * 永続化データの復元
      */
-    public static function restore(CartRecord $record, EventChannel $eventChannel): self
+    private static function restore(CartRecord $record, EventChannel $eventChannel): self
     {
         return new self(
             customerUserId: $record->customerUserId,
@@ -79,7 +79,7 @@ final class Cart
     /**
      * 永続化
      */
-    public function toPersistenceRecord(): CartRecord
+    private function toPersistenceRecord(): CartRecord
     {
         return new CartRecord(
             customerUserId: $this->customerUserId,

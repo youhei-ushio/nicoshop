@@ -11,6 +11,7 @@ use App\Contexts\Sales\Domain\Persistence\OrderRecord;
 use App\Contexts\Sales\Domain\Persistence\OrderRepository;
 use App\Contexts\Sales\Domain\Value\Product;
 use App\Models;
+use Closure;
 use Illuminate\Support\Facades\DB;
 use IteratorIterator;
 use Traversable;
@@ -29,7 +30,9 @@ final class OrderRepositoryImpl implements OrderRepository
      */
     public function save(Order $order): void
     {
-        $record = $order->toPersistenceRecord();
+        $record =  Closure::bind(function() use ($order) {
+            return $order->toPersistenceRecord();
+        }, null, Order::class)->__invoke();
         DB::transaction(function () use ($record) {
             /** @var Models\Order $orderRow */
             $orderRow = Models\Order::query()
@@ -70,19 +73,22 @@ final class OrderRepositoryImpl implements OrderRepository
         $record = new OrderRecord(
             $orderRow->uuid,
             $orderRow->order_date->toDateTimeImmutable(),
-            array_map(function (Models\OrderItem $itemRow) {
+            $orderRow->items->map(function (Models\OrderItem $itemRow) {
                 return new Order\Item(
                     new Product(
                         $itemRow->product_id,
                         $itemRow->quantity,
                     ),
                 );
-            }, $orderRow->items),
+            }),
             $orderRow->customer_user_id,
             $orderRow->accepted,
             $orderRow->finished,
         );
-        return Order::restore($record, $this->eventChannel);
+        $eventChannel = $this->eventChannel;
+        return Closure::bind(function() use ($record, $eventChannel) {
+            return Order::restore($record, $eventChannel);
+        }, null, Order::class)->__invoke();
     }
 
     public function findUnacceptedOrder(): OrderIterator
@@ -96,7 +102,11 @@ final class OrderRepositoryImpl implements OrderRepository
 
             public function current(): Order
             {
-                return Order::restore(parent::current(), $this->eventChannel);
+                $record = parent::current();
+                $eventChannel = $this->eventChannel;
+                return Closure::bind(function() use ($record, $eventChannel) {
+                    return Order::restore($record, $eventChannel);
+                }, null, Order::class)->__invoke();
             }
         };
     }
