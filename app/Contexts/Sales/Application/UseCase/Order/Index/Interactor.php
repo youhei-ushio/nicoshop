@@ -22,7 +22,7 @@ final class Interactor
     public function execute(Input $input): OrderPaginator
     {
         return $this->orderQuery
-            ->onlyUnfinished()
+            ->withoutFinished()
             ->paginate($input->perPage, $input->currentPage)
             ->get();
     }
