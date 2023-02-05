@@ -30,7 +30,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
-final class ContextServiceProvider extends ServiceProvider
+final class SalesContextServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {

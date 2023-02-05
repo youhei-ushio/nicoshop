@@ -195,7 +195,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
-        App\Contexts\Sales\Infrastructure\Provider\ContextServiceProvider::class,
+        App\Contexts\Sales\Infrastructure\Provider\SalesContextServiceProvider::class,
 
     ],
 
