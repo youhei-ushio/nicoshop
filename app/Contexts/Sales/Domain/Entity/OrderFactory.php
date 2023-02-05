@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Contexts\Sales\Domain\Entity;
 
-use App\Contexts\Sales\Domain\EntityFactory;
 use App\Contexts\Sales\Domain\Value\Product;
+use Seasalt\Nicoca\Components\Domain\EntityFactory;
 
 final class OrderFactory extends EntityFactory
 {

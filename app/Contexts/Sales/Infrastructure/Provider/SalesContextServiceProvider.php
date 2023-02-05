@@ -8,29 +8,27 @@ use App\Contexts\Sales\Application\Persistence\CartItemQuery;
 use App\Contexts\Sales\Application\Persistence\OrderQuery;
 use App\Contexts\Sales\Application\Persistence\OrdersQuery;
 use App\Contexts\Sales\Application\Persistence\ProductQuery;
-use App\Contexts\Sales\Domain\Entity\IdFactory;
 use App\Contexts\Sales\Domain\Event\OrderCreated;
 use App\Contexts\Sales\Domain\Event\OrderFinished;
 use App\Contexts\Sales\Domain\Persistence\CartRepository;
-use App\Contexts\Sales\Domain\Persistence\EventChannel;
 use App\Contexts\Sales\Domain\Persistence\OrderRepository;
-use App\Contexts\Sales\Infrastructure\Factory\IdFactoryImpl;
 use App\Contexts\Sales\Infrastructure\Notification\OrderCreatedSlackNotification;
 use App\Contexts\Sales\Infrastructure\Notification\OrderDoneSlackNotification;
 use App\Contexts\Sales\Infrastructure\Persistence\CartItemQueryImpl;
 use App\Contexts\Sales\Infrastructure\Persistence\CartRepositoryImpl;
-use App\Contexts\Sales\Infrastructure\Persistence\EventChannelImpl;
 use App\Contexts\Sales\Infrastructure\Persistence\OrderQueryImpl;
-use App\Contexts\Sales\Infrastructure\Persistence\OrdersQueryImpl;
 use App\Contexts\Sales\Infrastructure\Persistence\OrderRepositoryImpl;
+use App\Contexts\Sales\Infrastructure\Persistence\OrdersQueryImpl;
 use App\Contexts\Sales\Infrastructure\Persistence\ProductQueryImpl;
-use App\Contexts\Sales\Presentation\Http\Component\CartItems;
 use App\Contexts\Sales\Presentation\Http\Component\CartIcon;
+use App\Contexts\Sales\Presentation\Http\Component\CartItems;
 use App\Contexts\Sales\Presentation\Http\Component\Products;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
+use Seasalt\Nicoca\Components\Domain\EventChannel;
+use Seasalt\Nicoca\Components\Infrastructure\Persistence\EventChannelImpl;
 
 final class SalesContextServiceProvider extends ServiceProvider
 {
@@ -63,10 +61,6 @@ final class SalesContextServiceProvider extends ServiceProvider
         $this->app->bind(
             abstract: ProductQuery::class,
             concrete: ProductQueryImpl::class,
-        );
-        $this->app->bind(
-            abstract: IdFactory::class,
-            concrete: IdFactoryImpl::class,
         );
         $this->app->bind(
             abstract: EventChannel::class,

@@ -11,6 +11,7 @@ use App\Contexts\Sales\Domain\Event\OrderCreated;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Tests\Unit\Mock\EventChannelImpl;
+use Tests\Unit\Mock\IdGeneratorImpl;
 
 final class StoreTest extends TestCase
 {
@@ -36,7 +37,7 @@ final class StoreTest extends TestCase
         $eventChannel->subscribe(OrderCreated::class, $subscriber);
         $orderFactory = new OrderFactory(
             $eventChannel,
-            new \Tests\Unit\Mock\IdFactoryImpl()
+            new IdGeneratorImpl(),
         );
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
@@ -81,13 +82,13 @@ final class StoreTest extends TestCase
     {
         // 検証内容設定
         $this->expectException(InvalidArgumentException::class);
-        $this->expectErrorMessage('Cannot order without products');
+        $this->expectExceptionMessage('Cannot order without products');
 
         // 前準備
         $eventChannel = new EventChannelImpl();
         $orderFactory = new OrderFactory(
             $eventChannel,
-            new \Tests\Unit\Mock\IdFactoryImpl()
+            new IdGeneratorImpl(),
         );
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
@@ -111,7 +112,7 @@ final class StoreTest extends TestCase
         $eventChannel = new EventChannelImpl();
         $orderFactory = new OrderFactory(
             $eventChannel,
-            new \Tests\Unit\Mock\IdFactoryImpl()
+            new IdGeneratorImpl(),
         );
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
@@ -142,13 +143,13 @@ final class StoreTest extends TestCase
     {
         // 検証内容設定
         $this->expectException(InvalidArgumentException::class);
-        $this->expectErrorMessage('The item quantity must not have more than 1000000.');
+        $this->expectExceptionMessage('The item quantity must not have more than 1000000.');
 
         // 前準備
         $eventChannel = new EventChannelImpl();
         $orderFactory = new OrderFactory(
             $eventChannel,
-            new \Tests\Unit\Mock\IdFactoryImpl()
+            new IdGeneratorImpl(),
         );
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
@@ -177,7 +178,7 @@ final class StoreTest extends TestCase
         $eventChannel = new EventChannelImpl();
         $orderFactory = new OrderFactory(
             $eventChannel,
-            new \Tests\Unit\Mock\IdFactoryImpl()
+            new IdGeneratorImpl(),
         );
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
@@ -210,13 +211,13 @@ final class StoreTest extends TestCase
     {
         // 検証内容設定
         $this->expectException(InvalidArgumentException::class);
-        $this->expectErrorMessage('The order must not have more than 100 items.');
+        $this->expectExceptionMessage('The order must not have more than 100 items.');
 
         // 前準備
         $eventChannel = new EventChannelImpl();
         $orderFactory = new OrderFactory(
             $eventChannel,
-            new \Tests\Unit\Mock\IdFactoryImpl()
+            new IdGeneratorImpl(),
         );
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(
@@ -249,13 +250,13 @@ final class StoreTest extends TestCase
     {
         // 検証内容設定
         $this->expectException(InvalidArgumentException::class);
-        $this->expectErrorMessage('The product has already been taken.');
+        $this->expectExceptionMessage('The product has already been taken.');
 
         // 前準備
         $eventChannel = new EventChannelImpl();
         $orderFactory = new OrderFactory(
             $eventChannel,
-            new \Tests\Unit\Mock\IdFactoryImpl()
+            new IdGeneratorImpl(),
         );
         $orderRepository = new Mock\OrderRepositoryImpl($eventChannel);
         $interactor = new Interactor(

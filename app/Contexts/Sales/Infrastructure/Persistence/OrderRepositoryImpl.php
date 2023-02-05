@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace App\Contexts\Sales\Infrastructure\Persistence;
 
 use App\Contexts\Sales\Domain\Entity\Order;
-use App\Contexts\Sales\Domain\EntityRepository;
-use App\Contexts\Sales\Domain\Persistence\EventChannel;
 use App\Contexts\Sales\Domain\Persistence\OrderIterator;
 use App\Contexts\Sales\Domain\Persistence\OrderRecord;
 use App\Contexts\Sales\Domain\Persistence\OrderRepository;
 use App\Contexts\Sales\Domain\Value\Product;
 use App\Models;
 use Illuminate\Support\Facades\DB;
+use Seasalt\Nicoca\Components\Domain\EventChannel;
+use Seasalt\Nicoca\Components\Infrastructure\Persistence\EntityRepositoryImpl;
 use Traversable;
 
-final class OrderRepositoryImpl extends EntityRepository implements OrderRepository
+final class OrderRepositoryImpl extends EntityRepositoryImpl implements OrderRepository
 {
     public function __construct(EventChannel $eventChannel)
     {
@@ -30,6 +30,7 @@ final class OrderRepositoryImpl extends EntityRepository implements OrderReposit
      */
     public function save(Order $order): void
     {
+        /** @var OrderRecord $record */
         $record = $this->createRecordFromEntity($order);
         DB::transaction(function () use ($record) {
             /** @var Models\Order $orderRow */

@@ -4,21 +4,14 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Mock;
 
-use App\Contexts\Sales\Domain\Event\CartItemAdded;
-use App\Contexts\Sales\Domain\Event\CartItemCleared;
-use App\Contexts\Sales\Domain\Event\OrderAccepted;
-use App\Contexts\Sales\Domain\Event\OrderCreated;
-use App\Contexts\Sales\Domain\Event\OrderFinished;
-use App\Contexts\Sales\Domain\Event\OrderNotYetAccepted;
-use App\Contexts\Sales\Domain\Persistence\EventChannel;
+use Seasalt\Nicoca\Components\Domain\Event;
+use Seasalt\Nicoca\Components\Domain\EventChannel;
 
 final class EventChannelImpl implements EventChannel
 {
     private array $subscribers = [];
 
-    public function publish(
-        OrderCreated|OrderAccepted|OrderNotYetAccepted|OrderFinished|CartItemAdded|CartItemCleared $event
-    ): void
+    public function publish(Event $event): void
     {
         $eventName = get_class($event);
         foreach ($this->subscribers[$eventName] ?? [] as $subscriber) {

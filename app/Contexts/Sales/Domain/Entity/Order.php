@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Contexts\Sales\Domain\Entity;
 
-use App\Contexts\Sales\Domain\Entity;
 use App\Contexts\Sales\Domain\Event\OrderAccepted;
-use App\Contexts\Sales\Domain\Event\OrderFinished;
 use App\Contexts\Sales\Domain\Event\OrderCreated;
+use App\Contexts\Sales\Domain\Event\OrderFinished;
 use App\Contexts\Sales\Domain\Event\OrderNotYetAccepted;
-use App\Contexts\Sales\Domain\Persistence\EventChannel;
 use App\Contexts\Sales\Domain\Persistence\OrderRecord;
 use App\Contexts\Sales\Domain\Value\Product;
 use BadMethodCallException;
 use DateTimeImmutable;
 use InvalidArgumentException;
+use Seasalt\Nicoca\Components\Domain\Entity;
+use Seasalt\Nicoca\Components\Domain\EventChannel;
 
 /**
  * 注文

@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace App\Contexts\Sales\Infrastructure\Persistence;
 
 use App\Contexts\Sales\Domain\Entity\Cart;
-use App\Contexts\Sales\Domain\EntityRepository;
 use App\Contexts\Sales\Domain\Persistence\CartRecord;
 use App\Contexts\Sales\Domain\Persistence\CartRepository;
-use App\Contexts\Sales\Domain\Persistence\EventChannel;
 use App\Contexts\Sales\Domain\Value\Product;
 use App\Models;
 use Illuminate\Support\Facades\DB;
+use Seasalt\Nicoca\Components\Domain\EventChannel;
+use Seasalt\Nicoca\Components\Infrastructure\Persistence\EntityRepositoryImpl;
 
-final class CartRepositoryImpl extends EntityRepository implements CartRepository
+final class CartRepositoryImpl extends EntityRepositoryImpl implements CartRepository
 {
     public function __construct(EventChannel $eventChannel)
     {
@@ -28,6 +28,7 @@ final class CartRepositoryImpl extends EntityRepository implements CartRepositor
      */
     public function save(Cart $cart): void
     {
+        /** @var CartRecord $record */
         $record = $this->createRecordFromEntity($cart);
         DB::transaction(function () use ($record) {
             /** @var Models\Cart $cartRow */

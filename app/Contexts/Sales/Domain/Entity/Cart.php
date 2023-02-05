@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Contexts\Sales\Domain\Entity;
 
-use App\Contexts\Sales\Domain\Entity;
 use App\Contexts\Sales\Domain\Event\CartItemAdded;
 use App\Contexts\Sales\Domain\Event\CartItemCleared;
 use App\Contexts\Sales\Domain\Persistence\CartRecord;
-use App\Contexts\Sales\Domain\Persistence\EventChannel;
 use App\Contexts\Sales\Domain\Value\Product;
 use InvalidArgumentException;
+use Seasalt\Nicoca\Components\Domain\Entity;
+use Seasalt\Nicoca\Components\Domain\EventChannel;
 
 /**
  * カート
@@ -68,7 +68,7 @@ final class Cart extends Entity
     /**
      * 永続化データの復元
      */
-    protected static function restore(CartRecord $record, EventChannel $eventChannel): self
+    protected static function restore(EventChannel $eventChannel, CartRecord $record): self
     {
         return new self(
             eventChannel: $eventChannel,

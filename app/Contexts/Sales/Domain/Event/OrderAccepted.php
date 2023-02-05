@@ -6,8 +6,9 @@ namespace App\Contexts\Sales\Domain\Event;
 
 use App\Contexts\Sales\Domain\Entity\Order;
 use DateTimeImmutable;
+use Seasalt\Nicoca\Components\Domain\Event;
 
-final class OrderAccepted
+final class OrderAccepted extends Event
 {
     /**
      * @param Order\Item[] $items
@@ -19,6 +20,6 @@ final class OrderAccepted
         public readonly int $customerUserId,
     )
     {
-
+        parent::__construct();
     }
 }

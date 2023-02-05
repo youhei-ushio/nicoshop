@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Tests\Unit\Sales\Order\Mock;
 
 use App\Contexts\Sales\Domain\Entity\Order;
-use App\Contexts\Sales\Domain\EntityRepository;
-use App\Contexts\Sales\Domain\Persistence\EventChannel;
 use App\Contexts\Sales\Domain\Persistence\OrderIterator;
 use App\Contexts\Sales\Domain\Persistence\OrderRecord;
 use App\Contexts\Sales\Domain\Persistence\OrderRepository;
@@ -14,8 +12,10 @@ use App\Contexts\Sales\Domain\Value\Product;
 use BadMethodCallException;
 use DateTimeImmutable;
 use Generator;
+use Seasalt\Nicoca\Components\Domain\EventChannel;
+use Seasalt\Nicoca\Components\Infrastructure\Persistence\EntityRepositoryImpl;
 
-final class NotAcceptedOrderRepositoryImpl extends EntityRepository implements OrderRepository
+final class NotAcceptedOrderRepositoryImpl extends EntityRepositoryImpl implements OrderRepository
 {
     /** @var OrderRecord[] $orders */
     private readonly array $orders;

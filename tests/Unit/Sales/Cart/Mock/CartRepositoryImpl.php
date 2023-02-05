@@ -7,40 +7,31 @@ namespace Tests\Unit\Sales\Cart\Mock;
 use App\Contexts\Sales\Domain\Entity\Cart;
 use App\Contexts\Sales\Domain\Persistence\CartRecord;
 use App\Contexts\Sales\Domain\Persistence\CartRepository;
-use App\Contexts\Sales\Domain\Persistence\EventChannel;
-use Closure;
+use Seasalt\Nicoca\Components\Domain\EventChannel;
+use Seasalt\Nicoca\Components\Infrastructure\Persistence\EntityRepositoryImpl;
 
-final class CartRepositoryImpl implements CartRepository
+final class CartRepositoryImpl extends EntityRepositoryImpl implements CartRepository
 {
     private array $items = [];
 
-    public function __construct(
-        private readonly EventChannel $eventChannel,
-    )
+    public function __construct(EventChannel $eventChannel)
     {
-
+        parent::__construct($eventChannel, Cart::class);
     }
 
     public function save(Cart $cart): void
     {
-        $this->items =  Closure::bind(function() use ($cart) {
-            return $cart->toPersistenceRecord()->items;
-        }, null, Cart::class)->__invoke();
+        $record = $this->createRecordFromEntity($cart);
+        $this->items =  $record->items;
     }
 
     public function findByCustomerId(int $customerUserId): Cart
     {
         $items = $this->items;
-        $eventChannel = $this->eventChannel;
-        return Closure::bind(function() use ($customerUserId, $items, $eventChannel) {
-            return Cart::restore(
-                new CartRecord(
-                    $customerUserId,
-                    $items,
-                ),
-                $eventChannel,
-            );
-        }, null, Cart::class)->__invoke();
+        return $this->restoreEntity(new CartRecord(
+            $customerUserId,
+            $items,
+        ));
     }
 
     public function getItems(): array
