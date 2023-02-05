@@ -59,7 +59,7 @@ final class DoneTest extends TestCase
     {
         // 検証内容設定
         $this->expectException(BadMethodCallException::class);
-        $this->expectErrorMessage('The order not yet accepted.');
+        $this->expectExceptionMessage('The order not yet accepted.');
 
         // 前準備
         $eventChannel = new EventChannelImpl();
@@ -80,7 +80,7 @@ final class DoneTest extends TestCase
     {
         // 検証内容設定
         $this->expectException(BadMethodCallException::class);
-        $this->expectErrorMessage('The order has already done.');
+        $this->expectExceptionMessage('The order has already done.');
 
         // 前準備
         $eventChannel = new EventChannelImpl();

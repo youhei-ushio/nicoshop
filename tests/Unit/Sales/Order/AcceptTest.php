@@ -59,7 +59,7 @@ final class AcceptTest extends TestCase
     {
         // 検証内容設定
         $this->expectException(BadMethodCallException::class);
-        $this->expectErrorMessage('The order has already been accepted.');
+        $this->expectExceptionMessage('The order has already been accepted.');
 
         // 前準備
         $eventChannel = new EventChannelImpl();
