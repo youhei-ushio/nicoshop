@@ -6,9 +6,5 @@ namespace App\Contexts\Sales\Application\Persistence;
 
 interface OrderQuery
 {
-    public function withoutFinished(): self;
-
-    public function paginate(int $perPage, int $currentPage): self;
-
-    public function get(): OrderPaginator;
+    public function get(string $id): OrderQueryResult;
 }

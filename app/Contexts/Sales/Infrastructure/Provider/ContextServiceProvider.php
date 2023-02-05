@@ -6,6 +6,7 @@ namespace App\Contexts\Sales\Infrastructure\Provider;
 
 use App\Contexts\Sales\Application\Persistence\CartItemQuery;
 use App\Contexts\Sales\Application\Persistence\OrderQuery;
+use App\Contexts\Sales\Application\Persistence\OrdersQuery;
 use App\Contexts\Sales\Application\Persistence\ProductQuery;
 use App\Contexts\Sales\Domain\Entity\IdFactory;
 use App\Contexts\Sales\Domain\Event\OrderCreated;
@@ -18,6 +19,7 @@ use App\Contexts\Sales\Infrastructure\Persistence\CartItemQueryImpl;
 use App\Contexts\Sales\Infrastructure\Persistence\CartRepositoryImpl;
 use App\Contexts\Sales\Infrastructure\Persistence\EventChannelImpl;
 use App\Contexts\Sales\Infrastructure\Persistence\OrderQueryImpl;
+use App\Contexts\Sales\Infrastructure\Persistence\OrdersQueryImpl;
 use App\Contexts\Sales\Infrastructure\Persistence\OrderRepositoryImpl;
 use App\Contexts\Sales\Infrastructure\Persistence\ProductQueryImpl;
 use App\Contexts\Sales\Presentation\Http\Component\CartItems;
@@ -69,8 +71,8 @@ final class ContextServiceProvider extends ServiceProvider
             concrete: OrderRepositoryImpl::class,
         );
         $this->app->bind(
-            abstract: OrderQuery::class,
-            concrete: OrderQueryImpl::class,
+            abstract: OrdersQuery::class,
+            concrete: OrdersQueryImpl::class,
         );
         $this->app->bind(
             abstract: CartItemQuery::class,
@@ -79,6 +81,10 @@ final class ContextServiceProvider extends ServiceProvider
         $this->app->bind(
             abstract: CartRepository::class,
             concrete: CartRepositoryImpl::class,
+        );
+        $this->app->bind(
+            abstract: OrderQuery::class,
+            concrete: OrderQueryImpl::class,
         );
     }
 }

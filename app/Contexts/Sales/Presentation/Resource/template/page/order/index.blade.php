@@ -39,7 +39,7 @@ use App\Contexts\Sales\Application\Persistence\OrderPaginator;
 <ul>
     @foreach($orders as $order)
         <li>[{{ $order->date->format('Y-m-d') }}]
-            <a href="">{{ $order->id }}</a>
+            <a href="{{ route('sales.orders.detail', ['id' => $order->id]) }}">{{ $order->id }}</a>
             <div>Customer: {{ $order->customerUserId }}</div>
             @if ($order->accepted)
                 <div>受付済</div>
