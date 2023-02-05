@@ -5,21 +5,22 @@ declare(strict_types=1);
 namespace App\Contexts\Sales\Infrastructure\Persistence;
 
 use App\Contexts\Sales\Domain\Entity\Cart;
+use App\Contexts\Sales\Domain\EntityRepository;
 use App\Contexts\Sales\Domain\Persistence\CartRecord;
 use App\Contexts\Sales\Domain\Persistence\CartRepository;
 use App\Contexts\Sales\Domain\Persistence\EventChannel;
 use App\Contexts\Sales\Domain\Value\Product;
 use App\Models;
-use Closure;
 use Illuminate\Support\Facades\DB;
 
-final class CartRepositoryImpl implements CartRepository
+final class CartRepositoryImpl extends EntityRepository implements CartRepository
 {
-    public function __construct(
-        private readonly EventChannel $eventChannel,
-    )
+    public function __construct(EventChannel $eventChannel)
     {
-
+        parent::__construct(
+            eventChannel: $eventChannel,
+            entity: Cart::class,
+        );
     }
 
     /**
@@ -27,9 +28,7 @@ final class CartRepositoryImpl implements CartRepository
      */
     public function save(Cart $cart): void
     {
-        $record =  Closure::bind(function() use ($cart) {
-            return $cart->toPersistenceRecord();
-        }, null, Cart::class)->__invoke();
+        $record = $this->createRecordFromEntity($cart);
         DB::transaction(function () use ($record) {
             /** @var Models\Cart $cartRow */
             $cartRow = Models\Cart::query()
@@ -74,9 +73,6 @@ final class CartRepositoryImpl implements CartRepository
                 );
             })?->toArray() ?? [],
         );
-        $eventChannel = $this->eventChannel;
-        return Closure::bind(function() use ($record, $eventChannel) {
-            return Cart::restore($record, $eventChannel);
-        }, null, Cart::class)->__invoke();
+        return parent::restoreEntity($record);
     }
 }

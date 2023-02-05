@@ -5,27 +5,31 @@ declare(strict_types=1);
 namespace Tests\Unit\Sales\Order\Mock;
 
 use App\Contexts\Sales\Domain\Entity\Order;
+use App\Contexts\Sales\Domain\EntityRepository;
 use App\Contexts\Sales\Domain\Persistence\EventChannel;
-use App\Contexts\Sales\Domain\Persistence\OrderRepository;
 use App\Contexts\Sales\Domain\Persistence\OrderIterator;
 use App\Contexts\Sales\Domain\Persistence\OrderRecord;
+use App\Contexts\Sales\Domain\Persistence\OrderRepository;
 use App\Contexts\Sales\Domain\Value\Product;
 use BadMethodCallException;
-use Closure;
 use DateTimeImmutable;
 use Generator;
-use IteratorIterator;
-use Traversable;
 
-final class NotAcceptedOrderRepositoryImpl implements OrderRepository
+final class NotAcceptedOrderRepositoryImpl extends EntityRepository implements OrderRepository
 {
     /** @var OrderRecord[] $orders */
     private readonly array $orders;
 
-    public function __construct(
-        private readonly EventChannel $eventChannel,
-    )
+    /**
+     * @throws
+     */
+    public function __construct(EventChannel $eventChannel)
     {
+        parent::__construct(
+            eventChannel: $eventChannel,
+            entity: Order::class,
+        );
+
         // 件数多めにしておく
         $orders = [];
         for ($i = 0; $i < 10000; $i++) {
@@ -48,7 +52,7 @@ final class NotAcceptedOrderRepositoryImpl implements OrderRepository
         $this->orders = $orders;
     }
 
-    private function paginate(): Generator
+    private function paginateUnacceptedOrder(): Generator
     {
         // ページングを疑似的に再現。実務ではEloquentによるget()をlimit=1000で実行。
         $perPage = 1000;
@@ -76,21 +80,10 @@ final class NotAcceptedOrderRepositoryImpl implements OrderRepository
 
     public function findUnacceptedOrder(): OrderIterator
     {
-        return new class($this->paginate(), $this->eventChannel) extends IteratorIterator implements OrderIterator
-        {
-            public function __construct(Traversable $iterator, private readonly EventChannel $eventChannel)
-            {
-                parent::__construct($iterator);
-            }
-
-            public function current(): Order
-            {
-                $record = parent::current();
-                $eventChannel = $this->eventChannel;
-                return Closure::bind(function() use ($record, $eventChannel) {
-                    return Order::restore($record, $eventChannel);
-                }, null, Order::class)->__invoke();
-            }
-        };
+        return new OrderIterator(
+            eventChannel: $this->eventChannel,
+            entity: $this->entity,
+            records: $this->paginateUnacceptedOrder(),
+        );
     }
 }

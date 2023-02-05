@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Contexts\Sales\Domain\Entity;
 
+use App\Contexts\Sales\Domain\Entity;
 use App\Contexts\Sales\Domain\Event\CartItemAdded;
 use App\Contexts\Sales\Domain\Event\CartItemCleared;
 use App\Contexts\Sales\Domain\Persistence\CartRecord;
@@ -14,18 +15,18 @@ use InvalidArgumentException;
 /**
  * カート
  */
-final class Cart
+final class Cart extends Entity
 {
     /**
      * @param Cart\Item[] $items
      */
     private function __construct(
+        private readonly EventChannel $eventChannel,
         private readonly int $customerUserId,
         private array $items,
-        private readonly EventChannel $eventChannel,
     )
     {
-
+        parent::__construct($this->eventChannel);
     }
 
     /**
@@ -67,19 +68,19 @@ final class Cart
     /**
      * 永続化データの復元
      */
-    private static function restore(CartRecord $record, EventChannel $eventChannel): self
+    protected static function restore(CartRecord $record, EventChannel $eventChannel): self
     {
         return new self(
+            eventChannel: $eventChannel,
             customerUserId: $record->customerUserId,
             items: $record->items,
-            eventChannel: $eventChannel,
         );
     }
 
     /**
      * 永続化
      */
-    private function toPersistenceRecord(): CartRecord
+    protected function toPersistenceRecord(): CartRecord
     {
         return new CartRecord(
             customerUserId: $this->customerUserId,

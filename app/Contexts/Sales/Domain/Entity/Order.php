@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Contexts\Sales\Domain\Entity;
 
+use App\Contexts\Sales\Domain\Entity;
 use App\Contexts\Sales\Domain\Event\OrderAccepted;
 use App\Contexts\Sales\Domain\Event\OrderFinished;
 use App\Contexts\Sales\Domain\Event\OrderCreated;
@@ -18,23 +19,23 @@ use InvalidArgumentException;
 /**
  * 注文
  */
-final class Order
+final class Order extends Entity
 {
     /**
      * @param Order\Item[] $items
      * @see OrderFactory
      */
     private function __construct(
+        EventChannel $eventChannel,
         private readonly string $id,
         private readonly DateTimeImmutable $date,
         private readonly int $customerUserId,
         private array $items,
         private bool $accepted,
         private bool $finished,
-        private readonly EventChannel $eventChannel,
     )
     {
-
+        parent::__construct($eventChannel);
     }
 
     /**
@@ -66,7 +67,7 @@ final class Order
         }
         $this->accepted = true;
 
-        $this->eventChannel->publish(new OrderAccepted(
+        $this->publish(new OrderAccepted(
             id: $this->id,
             date: $this->date,
             items: $this->items,
@@ -85,7 +86,7 @@ final class Order
         $now = new DateTimeImmutable();
         if ($now > $this->date->modify('tomorrow')) {
             // 注文後に未受付のまま1日経過したらリマインド
-            $this->eventChannel->publish(new OrderNotYetAccepted(
+            $this->publish(new OrderNotYetAccepted(
                 id: $this->id,
                 date: $this->date,
                 items: $this->items,
@@ -109,7 +110,7 @@ final class Order
         }
         $this->finished = true;
 
-        $this->eventChannel->publish(
+        $this->publish(
             new OrderFinished(
                 id: $this->id,
                 date: $this->date,
@@ -123,11 +124,11 @@ final class Order
      * @param Product[] $products
      * @see OrderFactory
      */
-    private static function create(
+    protected static function create(
+        EventChannel $eventChannel,
         string $id,
         int $customerUserId,
         array $products,
-        EventChannel $eventChannel,
     ): self
     {
         if (empty($products)) {
@@ -135,18 +136,18 @@ final class Order
             throw new InvalidArgumentException('Cannot order without products');
         }
         $order = new self(
+            eventChannel: $eventChannel,
             id: $id,
             date: new DateTimeImmutable(), // 当日
             customerUserId: $customerUserId,
             items: [],
             accepted: false, // 未受付
             finished: false, // 未完了
-            eventChannel: $eventChannel,
         );
         foreach ($products as $product) {
             $order->add($product);
         }
-        $eventChannel->publish(
+        $order->publish(
             new OrderCreated(
                 id: $order->id,
                 date: $order->date,
@@ -160,23 +161,23 @@ final class Order
     /**
      * 永続化データの復元
      */
-    private static function restore(OrderRecord $record, EventChannel $eventChannel): self
+    protected static function restore(EventChannel $eventChannel, OrderRecord $record): self
     {
         return new self(
+            eventChannel: $eventChannel,
             id: $record->id,
             date: $record->date,
             customerUserId: $record->customerUserId,
             items: $record->items,
             accepted: $record->accepted,
             finished: $record->finished,
-            eventChannel: $eventChannel,
         );
     }
 
     /**
      * 永続化
      */
-    private function toPersistenceRecord(): OrderRecord
+    protected function toPersistenceRecord(): OrderRecord
     {
         return new OrderRecord(
             id: $this->id,

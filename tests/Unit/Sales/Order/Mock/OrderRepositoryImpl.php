@@ -5,41 +5,36 @@ declare(strict_types=1);
 namespace Tests\Unit\Sales\Order\Mock;
 
 use App\Contexts\Sales\Domain\Entity\Order;
+use App\Contexts\Sales\Domain\EntityRepository;
 use App\Contexts\Sales\Domain\Persistence\EventChannel;
 use App\Contexts\Sales\Domain\Persistence\OrderIterator;
 use App\Contexts\Sales\Domain\Persistence\OrderRecord;
 use App\Contexts\Sales\Domain\Persistence\OrderRepository;
 use App\Contexts\Sales\Domain\Value\Product;
 use BadMethodCallException;
-use Closure;
 use DateTimeImmutable;
 
-final class OrderRepositoryImpl implements OrderRepository
+final class OrderRepositoryImpl extends EntityRepository implements OrderRepository
 {
     private array $records = [];
 
-    public function __construct(
-        private readonly EventChannel $eventChannel,
-    )
+    public function __construct(EventChannel $eventChannel)
     {
-
+        parent::__construct(
+            eventChannel: $eventChannel,
+            entity: Order::class,
+        );
     }
 
     public function save(Order $order): void
     {
-        $record = Closure::bind(function() use ($order) {
-            return $order->toPersistenceRecord();
-        }, null, Order::class)->__invoke();
+        $record = $this->createRecordFromEntity($order);
         $this->records[$record->id] = $record;
     }
 
     public function findById(string $id): Order
     {
-        $record = $this->records[$id];
-        $eventChannel = $this->eventChannel;
-        return Closure::bind(function() use ($record, $eventChannel) {
-            return Order::restore($record, $eventChannel);
-        }, null, Order::class)->__invoke();
+        return $this->restoreEntity($this->records[$id]);
     }
 
     /**

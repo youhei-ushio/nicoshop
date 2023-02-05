@@ -5,24 +5,24 @@ declare(strict_types=1);
 namespace App\Contexts\Sales\Infrastructure\Persistence;
 
 use App\Contexts\Sales\Domain\Entity\Order;
+use App\Contexts\Sales\Domain\EntityRepository;
 use App\Contexts\Sales\Domain\Persistence\EventChannel;
 use App\Contexts\Sales\Domain\Persistence\OrderIterator;
 use App\Contexts\Sales\Domain\Persistence\OrderRecord;
 use App\Contexts\Sales\Domain\Persistence\OrderRepository;
 use App\Contexts\Sales\Domain\Value\Product;
 use App\Models;
-use Closure;
 use Illuminate\Support\Facades\DB;
-use IteratorIterator;
 use Traversable;
 
-final class OrderRepositoryImpl implements OrderRepository
+final class OrderRepositoryImpl extends EntityRepository implements OrderRepository
 {
-    public function __construct(
-        private readonly EventChannel $eventChannel,
-    )
+    public function __construct(EventChannel $eventChannel)
     {
-
+        parent::__construct(
+            eventChannel: $eventChannel,
+            entity: Order::class,
+        );
     }
 
     /**
@@ -30,9 +30,7 @@ final class OrderRepositoryImpl implements OrderRepository
      */
     public function save(Order $order): void
     {
-        $record =  Closure::bind(function() use ($order) {
-            return $order->toPersistenceRecord();
-        }, null, Order::class)->__invoke();
+        $record = $this->createRecordFromEntity($order);
         DB::transaction(function () use ($record) {
             /** @var Models\Order $orderRow */
             $orderRow = Models\Order::query()
@@ -70,45 +68,17 @@ final class OrderRepositoryImpl implements OrderRepository
             ])
             ->where('uuid', $id)
             ->firstOrFail();
-        $record = new OrderRecord(
-            $orderRow->uuid,
-            $orderRow->order_date->toDateTimeImmutable(),
-            $orderRow->items->map(function (Models\OrderItem $itemRow) {
-                return new Order\Item(
-                    new Product(
-                        $itemRow->product_id,
-                        $itemRow->quantity,
-                    ),
-                );
-            }),
-            $orderRow->customer_user_id,
-            $orderRow->accepted,
-            $orderRow->finished,
-        );
-        $eventChannel = $this->eventChannel;
-        return Closure::bind(function() use ($record, $eventChannel) {
-            return Order::restore($record, $eventChannel);
-        }, null, Order::class)->__invoke();
+        $record = $this->createRecordFromRow($orderRow);
+        return parent::restoreEntity($record);
     }
 
     public function findUnacceptedOrder(): OrderIterator
     {
-        return new class($this->paginateUnacceptedOrder(), $this->eventChannel) extends IteratorIterator implements OrderIterator
-        {
-            public function __construct(Traversable $iterator, private readonly EventChannel $eventChannel)
-            {
-                parent::__construct($iterator);
-            }
-
-            public function current(): Order
-            {
-                $record = parent::current();
-                $eventChannel = $this->eventChannel;
-                return Closure::bind(function() use ($record, $eventChannel) {
-                    return Order::restore($record, $eventChannel);
-                }, null, Order::class)->__invoke();
-            }
-        };
+        return new OrderIterator(
+            eventChannel: $this->eventChannel,
+            entity: $this->entity,
+            records: $this->paginateUnacceptedOrder(),
+        );
     }
 
     private function paginateUnacceptedOrder(): Traversable
@@ -118,13 +88,32 @@ final class OrderRepositoryImpl implements OrderRepository
             ->where('finished', false)
             ->cursorPaginate(perPage: 1000);
         while (true) {
-            foreach ($paginator as $order) {
-                yield $order;
+            foreach ($paginator as $orderRow) {
+                yield $this->createRecordFromRow($orderRow);
             }
             if ($paginator->nextCursor() === null) {
                 break;
             }
             $paginator = Models\Order::query()->cursorPaginate(cursor: $paginator->nextCursor());
         }
+    }
+
+    private function createRecordFromRow(Models\Order $orderRow): OrderRecord
+    {
+        return new OrderRecord(
+            id: $orderRow->uuid,
+            date: $orderRow->order_date->toDateTimeImmutable(),
+            items: $orderRow->items->map(function (Models\OrderItem $itemRow) {
+                return new Order\Item(
+                    new Product(
+                        id: $itemRow->product_id,
+                        quantity: $itemRow->quantity,
+                    ),
+                );
+            })->toArray(),
+            customerUserId: $orderRow->customer_user_id,
+            accepted: $orderRow->accepted,
+            finished: $orderRow->finished,
+        );
     }
 }
