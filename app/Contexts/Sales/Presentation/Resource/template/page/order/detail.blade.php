@@ -38,6 +38,10 @@ use App\Contexts\Sales\Application\Persistence\OrderQueryResult;
         <form method="post" action="{{ route('sales.orders.accept', ['id' => $order->id]) }}">
             @csrf
             <button>受付</button>
+            <form method="post" action="{{ route('sales.orders.done', ['id' => $order->id]) }}">
+                @csrf
+                <button>完了</button>
+            </form>
         </form>
     @endif
 </div>

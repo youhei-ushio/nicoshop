@@ -6,17 +6,10 @@ namespace App\Contexts\Sales\Application\UseCase\Order\Done;
 
 final class Input
 {
-    private function __construct(
+    public function __construct(
         public readonly string $id,
     )
     {
 
-    }
-
-    public static function fromArray(array $input): self
-    {
-        return new self(
-            id: $input['id'],
-        );
     }
 }

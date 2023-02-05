@@ -43,6 +43,10 @@ use App\Contexts\Sales\Application\Persistence\OrderPaginator;
             <div>Customer: {{ $order->customerUserId }}</div>
             @if ($order->accepted)
                 <div>受付済</div>
+                <form method="post" action="{{ route('sales.orders.done', ['id' => $order->id]) }}">
+                    @csrf
+                    <button>完了</button>
+                </form>
             @else
                 <form method="post" action="{{ route('sales.orders.accept', ['id' => $order->id]) }}">
                     @csrf

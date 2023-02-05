@@ -10,11 +10,13 @@ use App\Contexts\Sales\Application\Persistence\OrdersQuery;
 use App\Contexts\Sales\Application\Persistence\ProductQuery;
 use App\Contexts\Sales\Domain\Entity\IdFactory;
 use App\Contexts\Sales\Domain\Event\OrderCreated;
+use App\Contexts\Sales\Domain\Event\OrderFinished;
 use App\Contexts\Sales\Domain\Persistence\CartRepository;
 use App\Contexts\Sales\Domain\Persistence\EventChannel;
 use App\Contexts\Sales\Domain\Persistence\OrderRepository;
 use App\Contexts\Sales\Infrastructure\Factory\IdFactoryImpl;
 use App\Contexts\Sales\Infrastructure\Notification\OrderCreatedSlackNotification;
+use App\Contexts\Sales\Infrastructure\Notification\OrderDoneSlackNotification;
 use App\Contexts\Sales\Infrastructure\Persistence\CartItemQueryImpl;
 use App\Contexts\Sales\Infrastructure\Persistence\CartRepositoryImpl;
 use App\Contexts\Sales\Infrastructure\Persistence\EventChannelImpl;
@@ -45,6 +47,10 @@ final class SalesContextServiceProvider extends ServiceProvider
         Event::listen(
             OrderCreated::class,
             [OrderCreatedSlackNotification::class, 'handle']
+        );
+        Event::listen(
+            OrderFinished::class,
+            [OrderDoneSlackNotification::class, 'handle']
         );
 
         Livewire::component('cart-icon', CartIcon::class);

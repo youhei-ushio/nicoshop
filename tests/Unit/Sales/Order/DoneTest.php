@@ -44,9 +44,7 @@ final class DoneTest extends TestCase
         $interactor = new Interactor(
             $repository,
         );
-        $interactor->execute(Input::fromArray([
-            'id' => $orderId,
-        ]));
+        $interactor->execute(new Input($orderId));
 
         // 検証
         $finishedOrder = current($repository->toArray());
@@ -72,9 +70,7 @@ final class DoneTest extends TestCase
         $interactor = new Interactor(
             $repository,
         );
-        $interactor->execute(Input::fromArray([
-            'id' => $orderId,
-        ]));
+        $interactor->execute(new Input($orderId));
     }
 
     /**
@@ -95,8 +91,6 @@ final class DoneTest extends TestCase
         $interactor = new Interactor(
             $repository,
         );
-        $interactor->execute(Input::fromArray([
-            'id' => $orderId,
-        ]));
+        $interactor->execute(new Input($orderId));
     }
 }
