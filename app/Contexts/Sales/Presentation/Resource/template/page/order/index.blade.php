@@ -41,6 +41,15 @@ use App\Contexts\Sales\Application\Persistence\OrderPaginator;
         <li>[{{ $order->date->format('Y-m-d') }}]
             <a href="">{{ $order->id }}</a>
             <div>Customer: {{ $order->customerUserId }}</div>
+            @if ($order->accepted)
+                <div>受付済</div>
+            @else
+                <form method="post" action="{{ route('sales.orders.accept', ['id' => $order->id]) }}">
+                    @csrf
+                    <button>受付</button>
+                </form>
+            @endif
         </li>
+        <hr>
     @endforeach
 </ul>

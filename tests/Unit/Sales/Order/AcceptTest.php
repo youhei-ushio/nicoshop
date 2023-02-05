@@ -44,9 +44,7 @@ final class AcceptTest extends TestCase
         $interactor = new Interactor(
             $repository,
         );
-        $interactor->execute(Input::fromArray([
-            'id' => $orderId,
-        ]));
+        $interactor->execute(new Input($orderId));
 
         // 検証
         $acceptedOrder = current($repository->toArray());
@@ -72,8 +70,6 @@ final class AcceptTest extends TestCase
         $interactor = new Interactor(
             $repository,
         );
-        $interactor->execute(Input::fromArray([
-            'id' => $orderId,
-        ]));
+        $interactor->execute(new Input($orderId));
     }
 }
