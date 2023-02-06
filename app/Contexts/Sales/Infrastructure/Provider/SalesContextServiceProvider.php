@@ -4,31 +4,14 @@ declare(strict_types=1);
 
 namespace App\Contexts\Sales\Infrastructure\Provider;
 
-use App\Contexts\Sales\Application\Persistence\CartItemQuery;
-use App\Contexts\Sales\Application\Persistence\OrderQuery;
-use App\Contexts\Sales\Application\Persistence\OrdersQuery;
-use App\Contexts\Sales\Application\Persistence\ProductQuery;
-use App\Contexts\Sales\Domain\Event\OrderCreated;
-use App\Contexts\Sales\Domain\Event\OrderFinished;
-use App\Contexts\Sales\Domain\Persistence\CartRepository;
-use App\Contexts\Sales\Domain\Persistence\OrderRepository;
-use App\Contexts\Sales\Infrastructure\Notification\OrderCreatedSlackNotification;
-use App\Contexts\Sales\Infrastructure\Notification\OrderDoneSlackNotification;
-use App\Contexts\Sales\Infrastructure\Persistence\CartItemQueryImpl;
-use App\Contexts\Sales\Infrastructure\Persistence\CartRepositoryImpl;
-use App\Contexts\Sales\Infrastructure\Persistence\OrderQueryImpl;
-use App\Contexts\Sales\Infrastructure\Persistence\OrderRepositoryImpl;
-use App\Contexts\Sales\Infrastructure\Persistence\OrdersQueryImpl;
-use App\Contexts\Sales\Infrastructure\Persistence\ProductQueryImpl;
-use App\Contexts\Sales\Presentation\Http\Component\CartIcon;
-use App\Contexts\Sales\Presentation\Http\Component\CartItems;
-use App\Contexts\Sales\Presentation\Http\Component\Products;
+use App\Contexts\Sales\Application;
+use App\Contexts\Sales\Domain;
+use App\Contexts\Sales\Infrastructure;
+use App\Contexts\Sales\Presentation;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
-use Seasalt\Nicoca\Components\Domain\EventChannel;
-use Seasalt\Nicoca\Components\Infrastructure\Persistence\EventChannelImpl;
 
 final class SalesContextServiceProvider extends ServiceProvider
 {
@@ -43,48 +26,44 @@ final class SalesContextServiceProvider extends ServiceProvider
             namespace: Str::lower($context));
 
         Event::listen(
-            OrderCreated::class,
-            [OrderCreatedSlackNotification::class, 'handle']
+            Domain\Event\OrderCreated::class,
+            [Infrastructure\Notification\OrderCreatedSlackNotification::class, 'handle']
         );
         Event::listen(
-            OrderFinished::class,
-            [OrderDoneSlackNotification::class, 'handle']
+            Domain\Event\OrderFinished::class,
+            [Infrastructure\Notification\OrderDoneSlackNotification::class, 'handle']
         );
 
-        Livewire::component('cart-icon', CartIcon::class);
-        Livewire::component('products', Products::class);
-        Livewire::component('cart', CartItems::class);
+        Livewire::component('cart-icon', Presentation\Http\Component\CartIcon::class);
+        Livewire::component('products', Presentation\Http\Component\Products::class);
+        Livewire::component('cart', Presentation\Http\Component\CartItems::class);
     }
 
     public function register(): void
     {
         $this->app->bind(
-            abstract: ProductQuery::class,
-            concrete: ProductQueryImpl::class,
+            abstract: Application\Persistence\ProductQuery::class,
+            concrete: Infrastructure\Persistence\ProductQueryImpl::class,
         );
         $this->app->bind(
-            abstract: EventChannel::class,
-            concrete: EventChannelImpl::class,
+            abstract: Domain\Persistence\OrderRepository::class,
+            concrete: Infrastructure\Persistence\OrderRepositoryImpl::class,
         );
         $this->app->bind(
-            abstract: OrderRepository::class,
-            concrete: OrderRepositoryImpl::class,
+            abstract: Application\Persistence\OrdersQuery::class,
+            concrete: Infrastructure\Persistence\OrdersQueryImpl::class,
         );
         $this->app->bind(
-            abstract: OrdersQuery::class,
-            concrete: OrdersQueryImpl::class,
+            abstract: Application\Persistence\CartItemQuery::class,
+            concrete: Infrastructure\Persistence\CartItemQueryImpl::class,
         );
         $this->app->bind(
-            abstract: CartItemQuery::class,
-            concrete: CartItemQueryImpl::class,
+            abstract: Domain\Persistence\CartRepository::class,
+            concrete: Infrastructure\Persistence\CartRepositoryImpl::class,
         );
         $this->app->bind(
-            abstract: CartRepository::class,
-            concrete: CartRepositoryImpl::class,
-        );
-        $this->app->bind(
-            abstract: OrderQuery::class,
-            concrete: OrderQueryImpl::class,
+            abstract: Application\Persistence\OrderQuery::class,
+            concrete: Infrastructure\Persistence\OrderQueryImpl::class,
         );
     }
 }

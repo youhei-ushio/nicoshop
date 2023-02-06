@@ -8,6 +8,7 @@ use Illuminate\Contracts\Pagination\Paginator;
 /**
  * @var Paginator $products
  * @var Models\Product $product
+ * @see Products
  */
 ?>
 <div>

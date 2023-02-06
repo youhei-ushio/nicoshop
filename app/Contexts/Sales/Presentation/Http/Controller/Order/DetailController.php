@@ -14,12 +14,12 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
 use Spatie\RouteAttributes\Attributes\Get;
-use Spatie\RouteAttributes\Attributes\WhereUuid;
+use Spatie\RouteAttributes\Attributes\WhereUlid;
 
 final class DetailController extends Controller
 {
     #[Get('/sales/orders/{id}', 'sales.orders.detail')]
-    #[WhereUuid('id')]
+    #[WhereUlid('id')]
     public function __invoke(
         string $id,
         Interactor $interactor,

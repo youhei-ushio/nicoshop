@@ -56,4 +56,19 @@ final class CartItems extends Component
             toast()->danger($exception->getMessage())->push();
         }
     }
+
+    public function order(UseCase\Cart\Order\Interactor $interactor): void
+    {
+        try {
+            $interactor->execute(
+                new UseCase\Cart\Order\Input(
+                    auth()->id(),
+                )
+            );
+            $this->emit('itemCleared');
+            toast()->success('Order completed!')->push();
+        } catch (InvalidArgumentException $exception) {
+            toast()->danger($exception->getMessage())->push();
+        }
+    }
 }

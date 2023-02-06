@@ -65,6 +65,11 @@ final class Cart extends Entity
         );
     }
 
+    public function toOrder(): array
+    {
+        return array_map(fn(Cart\Item $item) => $item->product, $this->items);
+    }
+
     /**
      * 永続化データの復元
      */

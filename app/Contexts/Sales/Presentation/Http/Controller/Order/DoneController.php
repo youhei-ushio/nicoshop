@@ -12,12 +12,12 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
 use Spatie\RouteAttributes\Attributes\Post;
-use Spatie\RouteAttributes\Attributes\WhereUuid;
+use Spatie\RouteAttributes\Attributes\WhereUlid;
 
 final class DoneController extends Controller
 {
     #[Post('/sales/orders/{id}/done', 'sales.orders.done')]
-    #[WhereUuid('id')]
+    #[WhereUlid('id')]
     public function __invoke(
         string $id,
         Interactor $interactor,
